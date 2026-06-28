@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse | Plataforma Inteligente de Estudos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0c0f14;
+  --surface: #13181f;
+  --surface2: #1a2030;
+  --border: #1f2a38;
+  --accent: #3b82f6;
+  --accent2: #6366f1;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #a855f7;
+  --text: #e2e8f0;
+  --text2: #64748b;
+  --text3: #94a3b8;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── AUTH SCREEN ── */
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 30% 20%, rgba(59,130,246,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(99,102,241,0.06) 0%, transparent 60%),
+              var(--bg);
+}
+
+.auth-card {
+  width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+}
+
+.auth-logo { text-align: center; margin-bottom: 28px; }
+.auth-logo-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.auth-logo-sub { font-size: 11px; color: var(--text2); font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+.auth-tabs { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.auth-tab { flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text2); background: transparent; border: none; transition: all .15s; font-family: var(--sans); }
+.auth-tab.active { background: var(--accent); color: #fff; }
+
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+.form-input, .form-select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--sans); font-size: 13px; padding: 10px 12px; outline: none; transition: border .15s; }
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.form-input::placeholder { color: var(--text2); }
+
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; font-family: var(--sans); }
+.btn-primary { background: var(--accent); color: #fff; width: 100%; padding: 11px; }
+.btn-primary:hover { background: #2563eb; }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--text3); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+.btn-sm { padding: 5px 12px; font-size: 11px; }
+.btn-danger { background: rgba(239,68,68,.12); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+.btn-danger:hover { background: rgba(239,68,68,.2); }
+.btn-success { background: rgba(34,197,94,.12); color: var(--green); border: 1px solid rgba(34,197,94,.2); }
+
+.auth-error { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--red); margin-bottom: 14px; display: none; }
+.auth-demo { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text2); text-align: center; line-height: 1.8; }
+
+/* ── APP SHELL ── */
+.app { display: none; flex-direction: column; min-height: 100vh; }
+.app.visible { display: flex; }
+
+.app-layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 0px); }
+
+/* ── SIDEBAR ── */
+.sidebar { width: 220px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; height: 100vh; overflow-y: auto; }
+.logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.logo-title { font-size: 16px; font-weight: 700; letter-spacing: -.3px; }
+.logo-sub { font-size: 10px; color: var(--text2); font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.user-chip { margin: 0 12px 16px; padding: 8px 10px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.user-name { font-size: 11px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 9px; color: var(--text2); font-family: var(--mono); }
+.nav-section { padding: 0 12px; margin-bottom: 8px; }
+.nav-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); padding: 0 8px; margin-bottom: 4px; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text3); transition: all .15s; border: none; background: none; width: 100%; text-align: left; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(59,130,246,.12); color: var(--accent); }
+.nav-icon { font-size: 14px; width: 16px; text-align: center; }
+.sidebar-footer { margin-top: auto; padding: 12px; }
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.page-title { font-size: 15px; font-weight: 600; }
+.topbar-right { display: flex; gap: 8px; align-items: center; }
+
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── CARDS / STATS ── */
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+.stat-value { font-size: 26px; font-weight: 700; font-family: var(--mono); line-height: 1; }
+.stat-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+.c-accent { color: var(--accent); }
+.c-green { color: var(--green); }
+.c-amber { color: var(--amber); }
+.c-red { color: var(--red); }
+.c-purple { color: var(--purple); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--text2); margin-bottom: 16px; }
+
+.grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+
+/* ── BADGES ── */
+.badge { font-size: 10px; font-family: var(--mono); padding: 2px 8px; border-radius: 4px; background: var(--surface2); color: var(--text3); display: inline-block; }
+.badge-green { background: rgba(34,197,94,.12); color: var(--green); }
+.badge-amber { background: rgba(245,158,11,.12); color: var(--amber); }
+.badge-blue { background: rgba(59,130,246,.12); color: var(--accent); }
+.badge-red { background: rgba(239,68,68,.12); color: var(--red); }
+.badge-purple { background: rgba(168,85,247,.12); color: var(--purple); }
+
+/* ── PROGRESS ── */
+.materia-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.materia-name { font-size: 12px; color: var(--text); width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.progress-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width .4s; }
+.progress-fill.green { background: var(--green); }
+.progress-fill.amber { background: var(--amber); }
+.materia-pct { font-size: 11px; font-family: var(--mono); color: var(--text2); width: 32px; text-align: right; }
+
+/* ── AGENDA ── */
+.agenda-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.agenda-item:last-child { border-bottom: none; }
+.agenda-hora { font-size: 10px; font-family: var(--mono); color: var(--text2); width: 40px; padding-top: 2px; }
+.agenda-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 4px; flex-shrink: 0; }
+.agenda-dot.green { background: var(--green); }
+.agenda-dot.amber { background: var(--amber); }
+.agenda-text { font-size: 12px; color: var(--text); flex: 1; }
+.agenda-dur { font-size: 10px; font-family: var(--mono); color: var(--text2); }
+
+/* ── SEMANA ── */
+.semana-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; margin-bottom: 20px; }
+.dia-col { display: flex; flex-direction: column; gap: 6px; }
+.dia-header { text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--text2); padding: 4px; font-family: var(--mono); }
+.dia-header.hoje { color: var(--accent); }
+.slot-bloco { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 11px; cursor: pointer; transition: all .15s; min-height: 50px; }
+.slot-bloco:hover { border-color: var(--accent); }
+.slot-bloco.ocupado { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.3); }
+.slot-bloco.feito { background: rgba(34,197,94,.08); border-color: rgba(34,197,94,.3); }
+.slot-materia { font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.slot-duracao { font-family: var(--mono); color: var(--text2); font-size: 10px; }
+
+/* ── MATÉRIAS ── */
+.materia-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+.materia-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; transition: background .15s; }
+.materia-header:hover { background: var(--surface2); }
+.materia-titulo { font-size: 13px; font-weight: 500; }
+.topicos-list { padding: 0 16px 12px; display: none; }
+.topico-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text3); }
+.topico-item:last-child { border-bottom: none; }
+.topico-check { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; font-size: 9px; }
+.topico-check.done { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* ── QUESTÕES ── */
+.questao-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 12px; }
+.questao-meta { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+.questao-texto { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 16px; }
+.alternativas { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.alternativa { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--text3); transition: all .15s; }
+.alternativa:hover { background: var(--surface2); color: var(--text); }
+.alternativa.correta { background: rgba(34,197,94,.1); border-color: var(--green); color: var(--green); }
+.alternativa.errada { background: rgba(239,68,68,.1); border-color: var(--red); color: var(--red); }
+.alt-letra { font-family: var(--mono); font-weight: 600; font-size: 11px; min-width: 16px; padding-top: 1px; }
+
+/* ── TABLE ── */
+.table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.table th { text-align: left; padding: 6px 12px; color: var(--text2); font-size: 10px; text-transform: uppercase; letter-spacing: .8px; border-bottom: 1px solid var(--border); font-weight: 500; }
+.table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text3); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--surface2); }
+
+/* ── MINI CHART ── */
+.mini-chart { height: 40px; display: flex; align-items: flex-end; gap: 3px; margin-top: 8px; }
+.bar { flex: 1; border-radius: 2px 2px 0 0; background: var(--accent); opacity: .6; min-height: 4px; }
+.bar:last-child { opacity: 1; }
+
+/* ── FILTER ── */
+.filter-select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-family: var(--sans); cursor: pointer; }
+.questoes-toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+
+/* ── ADMIN STYLES ── */
+.admin-banner { background: linear-gradient(135deg,rgba(168,85,247,.12),rgba(99,102,241,.08)); border: 1px solid rgba(168,85,247,.25); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--purple); }
+
+.aluno-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all .15s; }
+.aluno-card:hover { border-color: var(--accent); }
+.aluno-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.aluno-card-info { flex: 1; }
+.aluno-card-nome { font-size: 13px; font-weight: 600; color: var(--text); }
+.aluno-card-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.alunos-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+
+/* ── ADMIN ALUNO DETAIL ── */
+.back-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); cursor: pointer; margin-bottom: 16px; background: none; border: none; padding: 0; transition: color .15s; }
+.back-btn:hover { color: var(--text); }
+
+/* ── AVISO / MSG ── */
+.aviso-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 8px; }
+.aviso-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.aviso-titulo { font-size: 13px; font-weight: 500; color: var(--text); }
+.aviso-meta { font-size: 10px; color: var(--text2); font-family: var(--mono); }
+.aviso-body { font-size: 12px; color: var(--text3); line-height: 1.6; }
+.aviso-destinatario { margin-top: 6px; }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 200; display: none; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 520px; max-width: 95vw; max-height: 85vh; overflow-y: auto; }
+.modal-lg { width: 680px; }
+.modal-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.modal-actions .btn { width: auto; }
+
+/* ── AI PANEL ── */
+.ai-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 360px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; transform: translateX(100%); transition: transform .3s ease; z-index: 100; }
+.ai-panel.open { transform: translateX(0); }
+.ai-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.ai-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.ai-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.ai-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 90%; font-size: 12px; line-height: 1.6; padding: 10px 12px; border-radius: 8px; }
+.msg-user { align-self: flex-end; background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.2); }
+.msg-ai { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border); }
+.msg-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-bottom: 4px; font-family: var(--mono); }
+.ai-suggestions { padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid var(--border); }
+.suggestion-chip { font-size: 10px; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); cursor: pointer; transition: all .15s; }
+.suggestion-chip:hover { border-color: var(--accent); color: var(--accent); }
+.ai-input-area { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
+.ai-textarea { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--sans); font-size: 12px; padding: 8px 10px; resize: none; min-height: 36px; max-height: 100px; outline: none; }
+.ai-textarea:focus { border-color: var(--accent); }
+.ai-send { padding: 8px 12px; background: var(--accent); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 13px; transition: background .15s; }
+.ai-send:hover { background: #2563eb; }
+.ai-send:disabled { opacity: .5; cursor: not-allowed; }
+.thinking span { width: 5px; height: 5px; border-radius: 50%; background: var(--text2); animation: bounce 1.2s infinite; display: inline-block; margin: 0 2px; }
+.thinking span:nth-child(2){animation-delay:.2s} .thinking span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+/* ── IMPORT ── */
+.import-hero { border: 2px dashed var(--border); border-radius: 12px; padding: 40px 32px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 16px; }
+.import-hero:hover, .import-hero.drag { border-color: var(--accent); background: rgba(59,130,246,.04); }
+.paste-area { width: 100%; min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--sans); font-size: 12px; padding: 12px; resize: vertical; outline: none; line-height: 1.6; }
+.paste-area:focus { border-color: var(--accent); }
+.config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 14px 0; }
+.processing-overlay { position: fixed; inset: 0; background: rgba(12,15,20,.9); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.processing-overlay.open { display: flex; }
+.processing-ring { width: 56px; height: 56px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .9s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg)}}
+.pstep { font-size: 12px; color: var(--text2); font-family: var(--mono); display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.pstep.done { color: var(--green); }
+.pstep.active { color: var(--accent); }
+.pstep-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+/* ── PLANO ── */
+.plano-header { background: linear-gradient(135deg,rgba(59,130,246,.08),rgba(99,102,241,.08)); border: 1px solid rgba(59,130,246,.2); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; display: flex; align-items: flex-start; justify-content: space-between; }
+.priority-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+.priority-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; position: relative; overflow: hidden; }
+.priority-card::before { content:''; position: absolute; left:0;top:0;bottom:0;width:3px; }
+.priority-card.p1::before{background:var(--red)} .priority-card.p2::before{background:var(--amber)} .priority-card.p3::before{background:var(--green)}
+.priority-label { font-size:9px; text-transform:uppercase; letter-spacing:1px; font-family:var(--mono); margin-bottom:4px; }
+.p1 .priority-label{color:var(--red)} .p2 .priority-label{color:var(--amber)} .p3 .priority-label{color:var(--green)}
+.priority-mat { font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.priority-info { font-size:11px; color:var(--text2); }
+.cronograma-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:16px; }
+.fase-badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-family:var(--mono); font-weight:500; }
+.fase-1{background:rgba(239,68,68,.12);color:var(--red)} .fase-2{background:rgba(245,158,11,.12);color:var(--amber)} .fase-3{background:rgba(59,130,246,.12);color:var(--accent)} .fase-4{background:rgba(34,197,94,.12);color:var(--green)}
+.insight-box { background:rgba(99,102,241,.06); border:1px solid rgba(99,102,241,.2); border-radius:8px; padding:14px 16px; font-size:12px; color:var(--text3); line-height:1.7; }
+.plano-section-title { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--text2); margin-bottom:12px; }
+.plano-container { display:none; } .plano-container.show { display:block; }
+
+/* ── NOTIFY BADGE ── */
+.notify-badge { background:var(--red); color:#fff; font-size:9px; font-weight:700; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; margin-left:4px; font-family:var(--mono); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ── AI FAB ── */
+.ai-fab { position:fixed; bottom:24px; right:24px; width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(59,130,246,.35); transition:all .2s; z-index:99; }
+.ai-fab:hover{transform:scale(1.08)}
+
+.section-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.empty-state { text-align:center; padding:48px 24px; color:var(--text2); font-size:13px; }
+.empty-icon { font-size:32px; margin-bottom:12px; }
+
+textarea.form-input { min-height: 80px; resize: vertical; }
+
+/* ── RELATÓRIO ── */
+.relatorio-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+.relatorio-select { background:var(--surface); border:1px solid var(--border); color:var(--text); padding:7px 12px; border-radius:8px; font-size:13px; font-family:var(--sans); min-width:220px; }
+
+.rel-header { background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(99,102,241,.08)); border:1px solid rgba(59,130,246,.2); border-radius:12px; padding:24px 28px; margin-bottom:20px; display:flex; align-items:flex-start; justify-content:space-between; }
+.rel-header-info {}
+.rel-nome { font-size:20px; font-weight:700; letter-spacing:-.3px; }
+.rel-concurso { font-size:13px; color:var(--text2); margin-top:4px; }
+.rel-data { font-size:11px; color:var(--text2); font-family:var(--mono); margin-top:8px; }
+.rel-header-actions { display:flex; gap:8px; flex-shrink:0; }
+
+.rel-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:20px; }
+.rel-kpi { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+.rel-kpi-label { font-size:10px; text-transform:uppercase; letter-spacing:.8px; color:var(--text2); margin-bottom:6px; }
+.rel-kpi-value { font-size:22px; font-weight:700; font-family:var(--mono); line-height:1; }
+.rel-kpi-sub { font-size:10px; color:var(--text2); margin-top:4px; }
+
+.rel-grid { display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-bottom:16px; }
+.rel-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px; }
+.rel-card-title { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--text2); margin-bottom:14px; }
+
+.mat-rel-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.mat-rel-name { font-size:12px; color:var(--text); width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mat-rel-bar { flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+.mat-rel-fill { height:100%; border-radius:3px; transition:width .4s; }
+.mat-rel-pct { font-size:11px; font-family:var(--mono); color:var(--text2); width:36px; text-align:right; }
+.mat-rel-badge { width:40px; text-align:right; }
+
+.horas-bars { display:flex; align-items:flex-end; gap:6px; height:80px; margin-top:8px; }
+.hora-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.hora-bar { width:100%; border-radius:3px 3px 0 0; background:var(--accent); opacity:.7; transition:height .3s; min-height:3px; }
+.hora-bar.atual { opacity:1; background:var(--accent); }
+.hora-bar-label { font-size:9px; font-family:var(--mono); color:var(--text2); }
+
+.meta-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.meta-row:last-child { border-bottom:none; }
+.meta-label { color:var(--text3); }
+.meta-val { font-weight:600; color:var(--text); font-family:var(--mono); }
+.meta-status { display:flex; align-items:center; gap:4px; }
+
+.diagnostico-box { background:rgba(99,102,241,.06); border:1px solid rgba(99,102,241,.18); border-radius:10px; padding:18px; margin-bottom:16px; }
+.diagnostico-loading { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--text2); }
+.diag-section { margin-bottom:14px; }
+.diag-section:last-child { margin-bottom:0; }
+.diag-section-title { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+.diag-section-title.green { color:var(--green); }
+.diag-section-title.red { color:var(--red); }
+.diag-section-title.amber { color:var(--amber); }
+.diag-section-title.blue { color:var(--accent); }
+.diag-text { font-size:12px; color:var(--text3); line-height:1.7; }
+
+.rel-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 24px; color:var(--text2); font-size:13px; gap:12px; }
+
+/* ── PRINT STYLES ── */
+@media print {
+  body { background:#fff !important; color:#000 !important; font-size:11pt; }
+  .sidebar, .topbar, .ai-panel, .ai-fab, .modal-overlay, .processing-overlay,
+  .relatorio-toolbar, .rel-header-actions, #navAdmin, #navAluno, .sidebar-footer { display:none !important; }
+  .app-layout { display:block !important; }
+  .main { overflow:visible !important; }
+  .content { padding:0 !important; overflow:visible !important; }
+  .view { display:none !important; }
+  .view.active { display:block !important; }
+  #print-report { display:block !important; }
+  .rel-header { background:#f0f4ff !important; border:1px solid #c7d7ff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .rel-kpi { border:1px solid #e2e8f0 !important; background:#f8fafc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .rel-card { border:1px solid #e2e8f0 !important; background:#f8fafc !important; page-break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .diagnostico-box { background:#f0f4ff !important; border:1px solid #c7d7ff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .mat-rel-bar { background:#e2e8f0 !important; }
+  .mat-rel-fill { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  * { color:#000 !important; }
+  .c-green, .diag-section-title.green { color:#16a34a !important; }
+  .c-red, .diag-section-title.red { color:#dc2626 !important; }
+  .c-amber, .diag-section-title.amber { color:#d97706 !important; }
+  .c-accent, .diag-section-title.blue { color:#2563eb !important; }
+  .badge-green { color:#16a34a !important; background:#dcfce7 !important; }
+  .badge-amber { color:#d97706 !important; background:#fef3c7 !important; }
+  .badge-blue { color:#2563eb !important; background:#dbeafe !important; }
+  .badge-red { color:#dc2626 !important; background:#fee2e2 !important; }
+  .rel-kpi-value { font-size:18pt !important; }
+  .rel-grid { grid-template-columns:1fr 1fr !important; }
+  .rel-kpis { grid-template-columns:repeat(5,1fr) !important; }
+  @page { margin:15mm 12mm; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════════════════ -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-title">Synapse</div>
+      <div class="auth-logo-sub">Plataforma Inteligente de Estudos</div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="switchTab('register')">Criar conta</button>
+    </div>
+
+    <div id="authError" class="auth-error"></div>
+
+    <!-- LOGIN -->
+    <div id="tabLogin">
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" id="loginEmail" type="email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="tabRegister" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input class="form-input" id="regNome" placeholder="Seu nome" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" id="regEmail" type="email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" id="regPassword" type="password" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Concurso alvo</label>
+        <input class="form-input" id="regConcurso" placeholder="Ex: TJMG Magistratura 2026">
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Criar conta</button>
+    </div>
+
+    <div class="auth-demo">
+      <strong style="color:var(--text3)">Acesso demo</strong><br>
+      Admin: <code style="color:var(--purple)">admin@studyos.com</code> / <code style="color:var(--purple)">admin123</code><br>
+      Aluno: <code style="color:var(--accent)">aluno@studyos.com</code> / <code style="color:var(--accent)">aluno123</code>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     APP
+═══════════════════════════════════════════════ -->
+<div class="app" id="app">
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="logo">
+        <div class="logo-title">Synapse</div>
+        <div class="logo-sub" id="sidebarRole">Inteligente</div>
+      </div>
+
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">—</div>
+          <div class="user-role" id="userRoleChip">aluno</div>
+        </div>
+      </div>
+
+      <!-- ALUNO NAV -->
+      <div id="navAluno">
+        <div class="nav-section">
+          <div class="nav-label">Visão geral</div>
+          <button class="nav-item active" onclick="showView('dashboard',this)"><span class="nav-icon">⚡</span> Dashboard</button>
+          <button class="nav-item" onclick="showView('cronograma',this)"><span class="nav-icon">📅</span> Cronograma</button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Edital</div>
+          <button class="nav-item" onclick="showView('importar',this)"><span class="nav-icon">⬆️</span> Importar Edital</button>
+          <button class="nav-item" onclick="showView('edital',this)"><span class="nav-icon">📋</span> Matérias</button>
+          <button class="nav-item" onclick="showView('questoes',this)"><span class="nav-icon">✏️</span> Questões</button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Análise</div>
+          <button class="nav-item" onclick="showView('desempenho',this)"><span class="nav-icon">📊</span> Desempenho</button>
+          <button class="nav-item" onclick="showView('avisos',this)"><span class="nav-icon">🔔</span> Avisos <span class="notify-badge" id="notifyBadge" style="display:none">0</span></button>
+        </div>
+      </div>
+
+      <!-- ADMIN NAV -->
+      <div id="navAdmin" style="display:none">
+        <div class="nav-section">
+          <div class="nav-label">Administração</div>
+          <button class="nav-item active" onclick="showView('adminDash',this)"><span class="nav-icon">⚡</span> Painel Admin</button>
+          <button class="nav-item" onclick="showView('adminAlunos',this)"><span class="nav-icon">👥</span> Alunos</button>
+          <button class="nav-item" onclick="showView('adminRelatorios',this)"><span class="nav-icon">📈</span> Relatórios</button>
+          <button class="nav-item" onclick="showView('adminAvisos',this)"><span class="nav-icon">📢</span> Avisos</button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost btn-sm" style="width:100%" onclick="doLogout()">↩ Sair</button>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm" id="btnAI" onclick="openAI()">✦ Assistente IA</button>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- ════ ALUNO: DASHBOARD ════ -->
+        <div class="view active" id="view-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">Horas esta semana</div><div class="stat-value c-accent">24<span style="font-size:14px">h</span></div><div class="stat-sub">↑ 3h vs semana passada</div></div>
+            <div class="stat-card"><div class="stat-label">Questões respondidas</div><div class="stat-value c-green">847</div><div class="stat-sub">68% de aproveitamento</div></div>
+            <div class="stat-card"><div class="stat-label">Tópicos concluídos</div><div class="stat-value">38<span style="font-size:14px;color:var(--text2)">/92</span></div><div class="stat-sub">41% do edital</div></div>
+            <div class="stat-card"><div class="stat-label">Dias p/ prova</div><div class="stat-value c-amber" id="diasProva">--</div><div class="stat-sub" id="diasProvaLabel">Adicione um concurso</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Progresso por matéria</div>
+              <div id="dashMaterias">
+                <div class="materia-row"><div class="materia-name">Direito Penal</div><div class="progress-track"><div class="progress-fill green" style="width:72%"></div></div><div class="materia-pct">72%</div></div>
+                <div class="materia-row"><div class="materia-name">Processo Penal</div><div class="progress-track"><div class="progress-fill" style="width:55%"></div></div><div class="materia-pct">55%</div></div>
+                <div class="materia-row"><div class="materia-name">Dir. Constitucional</div><div class="progress-track"><div class="progress-fill" style="width:48%"></div></div><div class="materia-pct">48%</div></div>
+                <div class="materia-row"><div class="materia-name">Dir. Administrativo</div><div class="progress-track"><div class="progress-fill amber" style="width:31%"></div></div><div class="materia-pct">31%</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Agenda de hoje</div>
+              <div class="agenda-item"><div class="agenda-hora">08:00</div><div class="agenda-dot green"></div><div class="agenda-text">Direito Penal — LEP<div style="font-size:10px;color:var(--text2)">Concluído ✓</div></div><div class="agenda-dur">2h</div></div>
+              <div class="agenda-item"><div class="agenda-hora">14:00</div><div class="agenda-dot"></div><div class="agenda-text">Processo Penal — Inquérito</div><div class="agenda-dur">2h</div></div>
+              <div class="agenda-item"><div class="agenda-hora">17:00</div><div class="agenda-dot amber"></div><div class="agenda-text">Questões — Dir. Constitucional</div><div class="agenda-dur">1h</div></div>
+            </div>
+          </div>
+          <!-- Aviso do admin no dash -->
+          <div id="dashAvisoAlert" style="display:none;margin-top:16px">
+            <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text3)">
+              <strong style="color:var(--purple)">📢 Novo aviso do instrutor:</strong>
+              <span id="dashAvisoText"></span>
+              <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="showView('avisos',null)">Ver todos</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ ALUNO: CRONOGRAMA ════ -->
+        <div class="view" id="view-cronograma">
+          <div class="section-row">
+            <div style="font-size:13px;color:var(--text3)">Semana atual — <span style="color:var(--text)" id="semanaLabel">Jun 2026</span></div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalBloco')">+ Bloco</button>
+          </div>
+          <div class="semana-grid" id="semanaGrid"></div>
+        </div>
+
+        <!-- ════ ALUNO: IMPORTAR ════ -->
+        <div class="view" id="view-importar">
+          <div id="importForm">
+            <div class="import-hero" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)" ondrop="handleDrop(event)">
+              <div style="font-size:32px;margin-bottom:8px">📄</div>
+              <div style="font-size:15px;font-weight:600;margin-bottom:6px">Arraste o edital aqui</div>
+              <div style="font-size:12px;color:var(--text2);margin-bottom:14px">TXT, PDF ou DOCX</div>
+              <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();document.getElementById('fileInput').click()">Escolher arquivo</button>
+              <input type="file" id="fileInput" style="display:none" accept=".txt,.pdf,.docx" onchange="handleFile(this)">
+              <div id="fileName" style="margin-top:10px;font-size:11px;color:var(--accent);display:none"></div>
+            </div>
+            <div style="text-align:center;color:var(--text2);font-size:12px;margin:10px 0">— ou cole o texto —</div>
+            <textarea class="paste-area" id="editalText" placeholder="Cole o conteúdo do edital aqui..."></textarea>
+            <div class="config-grid" style="margin-top:14px">
+              <div class="form-group" style="margin:0"><label class="form-label">Concurso</label><input class="form-input" id="impConcurso" placeholder="Ex: TJMG 2026"></div>
+              <div class="form-group" style="margin:0"><label class="form-label">Data da prova</label><input class="form-input" type="date" id="impData"></div>
+              <div class="form-group" style="margin:0"><label class="form-label">Horas/dia</label><select class="form-select" id="impHoras"><option value="2">2h</option><option value="3">3h</option><option value="4" selected>4h</option><option value="6">6h</option><option value="8">8h</option></select></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+              <button class="btn btn-primary" style="width:auto;padding:10px 24px" onclick="processarEdital()">✦ Gerar Plano com IA</button>
+              <span style="font-size:11px;color:var(--text2)">A IA analisa o edital e monta um cronograma priorizado</span>
+            </div>
+          </div>
+          <div class="plano-container" id="planoContainer">
+            <div class="plano-header">
+              <div><div style="font-size:16px;font-weight:700" id="planoTitulo">—</div><div style="font-size:12px;color:var(--text2);margin-top:4px" id="planoMeta">—</div></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="resetImport()">↩ Novo edital</button>
+                <button class="btn btn-primary btn-sm" onclick="aplicarPlano()">✓ Aplicar plano</button>
+              </div>
+            </div>
+            <div class="plano-section-title">Prioridade das matérias</div>
+            <div class="priority-grid" id="priorityGrid"></div>
+            <div class="cronograma-card">
+              <div class="plano-section-title">Fases do cronograma</div>
+              <table class="table"><thead><tr><th>Fase</th><th>Período</th><th>Foco</th><th>Horas/sem</th><th>Método</th></tr></thead><tbody id="planoFases"></tbody></table>
+            </div>
+            <div class="cronograma-card">
+              <div class="plano-section-title">Semana modelo</div>
+              <div class="semana-grid" id="semanaPlano" style="gap:8px"></div>
+            </div>
+            <div class="cronograma-card">
+              <div class="plano-section-title">✦ Insights estratégicos</div>
+              <div class="insight-box" id="planoInsights"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ ALUNO: MATÉRIAS ════ -->
+        <div class="view" id="view-edital">
+          <div class="section-row">
+            <div></div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalMateria')">+ Matéria</button>
+          </div>
+          <div id="materiasList"></div>
+        </div>
+
+        <!-- ════ ALUNO: QUESTÕES ════ -->
+        <div class="view" id="view-questoes">
+          <div class="questoes-toolbar">
+            <select class="filter-select"><option>Todas as matérias</option><option>Direito Penal</option><option>Processo Penal</option><option>Dir. Constitucional</option></select>
+            <select class="filter-select"><option>Todas as bancas</option><option>CESPE</option><option>FCC</option><option>Consulplan</option></select>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalQuestao')" style="margin-left:auto">+ Registrar questão</button>
+          </div>
+          <div class="questao-card" id="q1">
+            <div class="questao-meta"><span class="badge badge-blue">Dir. Penal</span><span class="badge">CESPE 2023</span><span class="badge">LEP</span></div>
+            <div class="questao-texto">Com relação à progressão de regime, assinale a alternativa correta conforme a Lei de Execução Penal e entendimentos sumulados do STJ.</div>
+            <div class="alternativas" id="alts-q1">
+              <div class="alternativa" onclick="responder('q1',0,false)"><span class="alt-letra">A</span>O reeducando condenado por crime hediondo poderá progredir de regime após cumprimento de 1/6 da pena.</div>
+              <div class="alternativa" onclick="responder('q1',1,false)"><span class="alt-letra">B</span>A progressão de regime exige apenas o requisito objetivo, dispensada a avaliação criminológica.</div>
+              <div class="alternativa" onclick="responder('q1',2,true)"><span class="alt-letra">C</span>Para crimes hediondos sem resultado morte, exige-se cumprimento de 40% da pena para progressão, se primário.</div>
+              <div class="alternativa" onclick="responder('q1',3,false)"><span class="alt-letra">D</span>A falta grave interrompe o prazo para progressão, mas não para livramento condicional.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="gerarExplicacaoIA('LEP - progressão de regime - crimes hediondos')">✦ Explicar com IA</button>
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('q1').style.borderColor='var(--amber)'">🔖 Revisão</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ ALUNO: DESEMPENHO ════ -->
+        <div class="view" id="view-desempenho">
+          <div class="grid-3" style="margin-bottom:16px">
+            <div class="stat-card"><div class="stat-label">Aproveitamento geral</div><div class="stat-value c-green">68%</div><div class="mini-chart"><div class="bar" style="height:40%"></div><div class="bar" style="height:55%"></div><div class="bar" style="height:62%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:68%"></div></div></div>
+            <div class="stat-card"><div class="stat-label">Horas (mês)</div><div class="stat-value c-accent">96h</div><div class="mini-chart"><div class="bar" style="height:60%;background:var(--accent2)"></div><div class="bar" style="height:75%;background:var(--accent2)"></div><div class="bar" style="height:80%;background:var(--accent2)"></div><div class="bar" style="height:85%;background:var(--accent2)"></div><div class="bar" style="height:90%;background:var(--accent2)"></div></div></div>
+            <div class="stat-card"><div class="stat-label">Questões hoje</div><div class="stat-value">32</div><div class="mini-chart"><div class="bar" style="height:50%;background:var(--amber)"></div><div class="bar" style="height:65%;background:var(--amber)"></div><div class="bar" style="height:75%;background:var(--amber)"></div><div class="bar" style="height:80%;background:var(--amber)"></div><div class="bar" style="height:85%;background:var(--amber)"></div></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Desempenho por matéria</div>
+            <table class="table"><thead><tr><th>Matéria</th><th>Questões</th><th>Acertos</th><th>Aproveit.</th><th>Trend</th></tr></thead><tbody>
+              <tr><td style="color:var(--text)">Direito Penal</td><td>312</td><td>228</td><td><span class="badge badge-green">73%</span></td><td class="c-green">↑</td></tr>
+              <tr><td style="color:var(--text)">Processo Penal</td><td>198</td><td>132</td><td><span class="badge badge-blue">67%</span></td><td class="c-accent">→</td></tr>
+              <tr><td style="color:var(--text)">Dir. Constitucional</td><td>184</td><td>118</td><td><span class="badge badge-blue">64%</span></td><td class="c-accent">→</td></tr>
+              <tr><td style="color:var(--text)">Dir. Administrativo</td><td>97</td><td>52</td><td><span class="badge badge-amber">54%</span></td><td class="c-amber">↓</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+
+        <!-- ════ ALUNO: AVISOS ════ -->
+        <div class="view" id="view-avisos">
+          <div id="avisosList">
+            <div class="empty-state"><div class="empty-icon">🔔</div>Nenhum aviso ainda</div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             ADMIN VIEWS
+        ═══════════════════════════════════════ -->
+
+        <!-- ════ ADMIN: DASHBOARD ════ -->
+        <div class="view" id="view-adminDash">
+          <div class="admin-banner">⬡ Painel de Administrador — visão consolidada de todos os alunos</div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">Alunos ativos</div><div class="stat-value c-accent" id="adminTotalAlunos">0</div><div class="stat-sub">cadastrados</div></div>
+            <div class="stat-card"><div class="stat-label">Média aproveitamento</div><div class="stat-value c-green" id="adminMediaAprov">—</div><div class="stat-sub">todos os alunos</div></div>
+            <div class="stat-card"><div class="stat-label">Avisos enviados</div><div class="stat-value c-purple" id="adminTotalAvisos">0</div><div class="stat-sub">este mês</div></div>
+            <div class="stat-card"><div class="stat-label">Planos gerados</div><div class="stat-value c-amber" id="adminTotalPlanos">0</div><div class="stat-sub">via IA</div></div>
+          </div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">Ranking de alunos — aproveitamento</div>
+            <table class="table" id="adminRankingTable">
+              <thead><tr><th>#</th><th>Aluno</th><th>Concurso</th><th>Aproveit.</th><th>Horas/sem</th><th>Último acesso</th><th>Ação</th></tr></thead>
+              <tbody id="adminRankingBody"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">Alunos com baixo desempenho (abaixo de 60%)</div>
+            <div id="adminAlertaAlunos"></div>
+          </div>
+        </div>
+
+        <!-- ════ ADMIN: ALUNOS ════ -->
+        <div class="view" id="view-adminAlunos">
+          <div id="adminAlunosList">
+            <div class="section-row">
+              <div style="font-size:13px;color:var(--text3)">Todos os alunos</div>
+              <button class="btn btn-primary btn-sm" onclick="openModal('modalCriarAluno')">+ Criar aluno</button>
+            </div>
+            <div class="alunos-grid" id="alunosGrid"></div>
+          </div>
+          <!-- detalhe do aluno -->
+          <div id="adminAlunoDetalhe" style="display:none">
+            <button class="back-btn" onclick="voltarListaAlunos()">← Voltar para alunos</button>
+            <div id="alunoDetalheContent"></div>
+          </div>
+        </div>
+
+        <!-- ════ ADMIN: AVISOS ════ -->
+        <div class="view" id="view-adminAvisos">
+          <div class="section-row">
+            <div style="font-size:13px;color:var(--text3)">Avisos e mensagens enviados</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalNovoAviso')">+ Novo aviso</button>
+          </div>
+          <div id="adminAvisosList"></div>
+        </div>
+
+        <!-- ════ ADMIN: RELATÓRIOS ════ -->
+        <div class="view" id="view-adminRelatorios">
+          <!-- selector -->
+          <div class="relatorio-toolbar">
+            <select class="relatorio-select" id="relAlunoSelect" onchange="onRelAlunoChange()">
+              <option value="">— Selecione um aluno —</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" id="btnGerarDiag" onclick="gerarDiagnosticoIA()" style="display:none">✦ Gerar diagnóstico IA</button>
+            <button class="btn btn-primary btn-sm" id="btnImprimirRel" onclick="imprimirRelatorio()" style="display:none">⬇ Exportar PDF</button>
+          </div>
+
+          <!-- empty state -->
+          <div class="rel-empty" id="relEmpty">
+            <div style="font-size:36px">📈</div>
+            <div>Selecione um aluno para gerar o relatório de desempenho</div>
+          </div>
+
+          <!-- report body (also used for print) -->
+          <div id="relatorioBody" style="display:none">
+
+            <!-- HEADER -->
+            <div class="rel-header">
+              <div class="rel-header-info">
+                <div class="rel-nome" id="relNome">—</div>
+                <div class="rel-concurso" id="relConcurso">—</div>
+                <div class="rel-data" id="relData">—</div>
+              </div>
+              <div class="rel-header-actions">
+                <span class="badge" id="relStatusBadge" style="font-size:11px;padding:4px 10px">—</span>
+              </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="rel-kpis">
+              <div class="rel-kpi"><div class="rel-kpi-label">Aproveitamento</div><div class="rel-kpi-value" id="relAprov" style="color:var(--green)">—</div><div class="rel-kpi-sub">em questões</div></div>
+              <div class="rel-kpi"><div class="rel-kpi-label">Edital concluído</div><div class="rel-kpi-value" id="relEdital" style="color:var(--accent)">—</div><div class="rel-kpi-sub">tópicos marcados</div></div>
+              <div class="rel-kpi"><div class="rel-kpi-label">Questões total</div><div class="rel-kpi-value" id="relQuestoes">—</div><div class="rel-kpi-sub">respondidas</div></div>
+              <div class="rel-kpi"><div class="rel-kpi-label">Horas/semana</div><div class="rel-kpi-value" id="relHoras" style="color:var(--amber)">—</div><div class="rel-kpi-sub">média</div></div>
+              <div class="rel-kpi"><div class="rel-kpi-label">Dias p/ prova</div><div class="rel-kpi-value" id="relDias" style="color:var(--purple)">—</div><div class="rel-kpi-sub" id="relDiasSub">—</div></div>
+            </div>
+
+            <div class="rel-grid">
+              <!-- Desempenho por matéria -->
+              <div class="rel-card">
+                <div class="rel-card-title">Desempenho por matéria</div>
+                <div id="relMaterias"></div>
+              </div>
+
+              <!-- Comparativo com meta + horas -->
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div class="rel-card">
+                  <div class="rel-card-title">Comparativo com a meta</div>
+                  <div id="relMetas"></div>
+                </div>
+                <div class="rel-card">
+                  <div class="rel-card-title">Horas de estudo — últimas semanas</div>
+                  <div class="horas-bars" id="relHorasBars"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Questões por matéria -->
+            <div class="rel-card" style="margin-bottom:16px">
+              <div class="rel-card-title">Análise de questões por matéria</div>
+              <table class="table" id="relQuestoesTable">
+                <thead><tr><th>Matéria</th><th>Total</th><th>Acertos est.</th><th>Aproveit.</th><th>Status</th><th>Ação sugerida</th></tr></thead>
+                <tbody id="relQuestoesBody"></tbody>
+              </table>
+            </div>
+
+            <!-- Diagnóstico IA -->
+            <div class="diagnostico-box" id="diagBox">
+              <div class="rel-card-title" style="margin-bottom:12px;color:var(--accent2)">✦ Diagnóstico com Inteligência Artificial</div>
+              <div id="diagContent">
+                <div style="font-size:12px;color:var(--text2)">Clique em "Gerar diagnóstico IA" para obter uma análise personalizada deste aluno.</div>
+              </div>
+            </div>
+
+            <!-- Plano do admin se houver -->
+            <div class="rel-card" id="relPlanoAdmin" style="margin-bottom:16px;display:none">
+              <div class="rel-card-title">Plano do instrutor</div>
+              <div id="relPlanoAdminContent" style="font-size:12px;color:var(--text3);line-height:1.7"></div>
+            </div>
+
+            <!-- rodapé para impressão -->
+            <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:10px;color:var(--text2);font-family:var(--mono)">Synapse · Relatório gerado em <span id="relGeradoEm">—</span></div>
+              <div style="font-size:10px;color:var(--text2)">Confidencial — uso exclusivo do instrutor</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /main -->
+  </div><!-- /app-layout -->
+</div><!-- /app -->
+
+<!-- ═══════ AI PANEL ═══════ -->
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-header">
+    <div class="ai-title"><div class="ai-dot"></div> Assistente IA</div>
+    <button class="btn btn-ghost btn-sm" onclick="closeAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="aiMessages">
+    <div class="msg msg-ai"><div class="msg-label">IA</div>Olá! Sou seu assistente de estudos. Posso explicar matérias, analisar questões, sugerir estratégias de estudo e mais.</div>
+  </div>
+  <div class="ai-suggestions">
+    <div class="suggestion-chip" onclick="sendSuggestion('Analise meu desempenho e onde devo focar')">Analisar desempenho</div>
+    <div class="suggestion-chip" onclick="sendSuggestion('Explique progressão de regime na LEP com base legal')">Explicar LEP</div>
+    <div class="suggestion-chip" onclick="sendSuggestion('Quais matérias têm melhor custo-benefício para estudar primeiro?')">Estratégia</div>
+  </div>
+  <div class="ai-input-area">
+    <textarea class="ai-textarea" id="aiInput" placeholder="Pergunte sobre matérias, questões, estratégia..." rows="1" onkeydown="handleAIKey(event)"></textarea>
+    <button class="ai-send" id="aiSendBtn" onclick="sendAI()">➤</button>
+  </div>
+</div>
+<button class="ai-fab" id="aiFab" onclick="openAI()">✦</button>
+
+<!-- ═══════ PROCESSING OVERLAY ═══════ -->
+<div class="processing-overlay" id="processingOverlay">
+  <div class="processing-ring"></div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div class="pstep" id="ps1"><span class="pstep-dot"></span>Lendo o edital...</div>
+    <div class="pstep" id="ps2"><span class="pstep-dot"></span>Identificando matérias e pesos...</div>
+    <div class="pstep" id="ps3"><span class="pstep-dot"></span>Calculando prioridades...</div>
+    <div class="pstep" id="ps4"><span class="pstep-dot"></span>Montando cronograma personalizado...</div>
+    <div class="pstep" id="ps5"><span class="pstep-dot"></span>Gerando insights estratégicos...</div>
+  </div>
+</div>
+
+<!-- ═══════ MODALS ═══════ -->
+
+<!-- CONCURSO -->
+<div class="modal-overlay" id="modalBloco">
+  <div class="modal">
+    <div class="modal-title">Novo bloco de estudo</div>
+    <div class="form-group"><label class="form-label">Dia</label><select class="form-select" id="blocoDia"><option value="0">Segunda</option><option value="1">Terça</option><option value="2">Quarta</option><option value="3">Quinta</option><option value="4">Sexta</option><option value="5">Sábado</option><option value="6">Domingo</option></select></div>
+    <div class="form-group"><label class="form-label">Matéria</label><input class="form-input" id="blocoMateria" placeholder="Ex: Direito Penal"></div>
+    <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="blocoHora" value="08:00"></div>
+    <div class="form-group"><label class="form-label">Duração</label><select class="form-select" id="blocoDur"><option>1h</option><option>1h30</option><option selected>2h</option><option>3h</option><option>4h</option></select></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" onclick="closeModal('modalBloco')">Cancelar</button><button class="btn btn-primary btn-sm" onclick="salvarBloco()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MATÉRIA -->
+<div class="modal-overlay" id="modalMateria">
+  <div class="modal">
+    <div class="modal-title">Nova matéria</div>
+    <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="matNome" placeholder="Ex: Direito Penal"></div>
+    <div class="form-group"><label class="form-label">Tópicos (um por linha)</label><textarea class="form-input" id="matTopicos" style="height:100px" placeholder="Teoria do Crime&#10;Tipicidade&#10;Culpabilidade"></textarea></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" onclick="closeModal('modalMateria')">Cancelar</button><button class="btn btn-primary btn-sm" onclick="salvarMateria()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- QUESTÃO -->
+<div class="modal-overlay" id="modalQuestao">
+  <div class="modal">
+    <div class="modal-title">Registrar questão</div>
+    <div class="form-group"><label class="form-label">Matéria</label><select class="form-select" id="qMateria"><option>Direito Penal</option><option>Processo Penal</option><option>Dir. Constitucional</option><option>Dir. Administrativo</option></select></div>
+    <div class="form-group"><label class="form-label">Banca / Ano</label><input class="form-input" id="qBanca" placeholder="Ex: CESPE 2024"></div>
+    <div class="form-group"><label class="form-label">Resultado</label><select class="form-select" id="qResult"><option value="acerto">Acertei</option><option value="erro">Errei</option></select></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" onclick="closeModal('modalQuestao')">Cancelar</button><button class="btn btn-primary btn-sm" onclick="closeModal('modalQuestao')">Registrar</button></div>
+  </div>
+</div>
+
+<!-- CRIAR ALUNO (ADMIN) -->
+<div class="modal-overlay" id="modalCriarAluno">
+  <div class="modal">
+    <div class="modal-title">Criar conta de aluno</div>
+    <div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" id="criarNome" placeholder="Nome do aluno"></div>
+    <div class="form-group"><label class="form-label">E-mail</label><input class="form-input" id="criarEmail" type="email" placeholder="aluno@email.com"></div>
+    <div class="form-group"><label class="form-label">Senha temporária</label><input class="form-input" id="criarSenha" placeholder="Mínimo 6 caracteres"></div>
+    <div class="form-group"><label class="form-label">Concurso alvo</label><input class="form-input" id="criarConcurso" placeholder="Ex: TJMG Magistratura 2026"></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" onclick="closeModal('modalCriarAluno')">Cancelar</button><button class="btn btn-primary btn-sm" onclick="adminCriarAluno()">Criar</button></div>
+  </div>
+</div>
+
+<!-- EDITAR PLANO ALUNO (ADMIN) -->
+<div class="modal-overlay" id="modalEditarPlano">
+  <div class="modal modal-lg">
+    <div class="modal-title">Editar plano de estudos — <span id="editarPlanoAluno" style="color:var(--accent)"></span></div>
+    <input type="hidden" id="editarPlanoUid">
+    <div class="form-group"><label class="form-label">Concurso</label><input class="form-input" id="epConcurso"></div>
+    <div class="form-group"><label class="form-label">Data da prova</label><input class="form-input" type="date" id="epData"></div>
+    <div class="form-group"><label class="form-label">Matérias prioritárias (uma por linha)</label><textarea class="form-input" id="epMaterias" style="height:100px"></textarea></div>
+    <div class="form-group"><label class="form-label">Observações / instruções para o aluno</label><textarea class="form-input" id="epObs" style="height:80px" placeholder="Ex: Focar em questões de Dir. Administrativo esta semana..."></textarea></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" onclick="closeModal('modalEditarPlano')">Cancelar</button><button class="btn btn-primary btn-sm" onclick="salvarPlanoAluno()">Salvar plano</button></div>
+  </div>
+</div>
+
+<!-- NOVO AVISO (ADMIN) -->
+<div class="modal-overlay" id="modalNovoAviso">
+  <div class="modal">
+    <div class="modal-title">Enviar aviso / mensagem</div>
+    <div class="form-group"><label class="form-label">Destinatário</label><select class="form-select" id="avisoDestinatario"><option value="todos">Todos os alunos</option></select></div>
+    <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="avisoTitulo" placeholder="Ex: Material complementar disponível"></div>
+    <div class="form-group"><label class="form-label">Mensagem</label><textarea class="form-input" id="avisoMensagem" style="height:100px" placeholder="Escreva sua mensagem aqui..."></textarea></div>
+    <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="avisoTipo"><option value="info">ℹ Informativo</option><option value="alerta">⚠ Alerta</option><option value="tarefa">📝 Tarefa</option><option value="elogio">🏆 Elogio</option></select></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" onclick="closeModal('modalNovoAviso')">Cancelar</button><button class="btn btn-primary btn-sm" onclick="enviarAviso()">Enviar</button></div>
+  </div>
+</div>
+
+<script type="module">
+// ══════════════════════════════════════════════════
+// ⚙️  CONFIGURAÇÃO FIREBASE
+// Substitua os valores abaixo com os do seu projeto
+// Console: https://console.firebase.google.com
+// ══════════════════════════════════════════════════
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc,
+  collection, getDocs, query, where, addDoc,
+  deleteDoc, serverTimestamp, orderBy
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBVRJtfw2UNREwpiGfWHEjh-lENtJ1aII0",
+  authDomain:        "synapse-a1aca.firebaseapp.com",
+  projectId:         "synapse-a1aca",
+  storageBucket:     "synapse-a1aca.firebasestorage.app",
+  messagingSenderId: "185348890747",
+  appId:             "1:185348890747:web:7d5f798f4baf9a0bb582de"
+};
+
+const fbApp  = initializeApp(FIREBASE_CONFIG);
+const auth   = getAuth(fbApp);
+const db     = getFirestore(fbApp);
+
+// ── Verificar se as chaves foram preenchidas ──
+const CONFIG_OK = !FIREBASE_CONFIG.apiKey.startsWith('COLE');
+if (!CONFIG_OK) {
+  document.body.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0c0f14;font-family:Inter,sans-serif;padding:24px">
+      <div style="max-width:560px;background:#13181f;border:1px solid #1f2a38;border-radius:16px;padding:36px">
+        <div style="font-size:28px;margin-bottom:12px">⚙️</div>
+        <div style="font-size:18px;font-weight:700;color:#e2e8f0;margin-bottom:8px">Configure o Firebase</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.7;margin-bottom:20px">
+          Abra o arquivo HTML e substitua os valores em <code style="color:#3b82f6;background:#1a2030;padding:2px 6px;border-radius:4px">FIREBASE_CONFIG</code> com as credenciais do seu projeto.
+        </div>
+        <div style="font-size:12px;color:#94a3b8;line-height:2">
+          <strong style="color:#e2e8f0">Passo 1</strong> — Acesse <a href="https://console.firebase.google.com" target="_blank" style="color:#3b82f6">console.firebase.google.com</a><br>
+          <strong style="color:#e2e8f0">Passo 2</strong> — Crie um projeto → clique em "Adicionar app" → Web (&lt;/&gt;)<br>
+          <strong style="color:#e2e8f0">Passo 3</strong> — Copie o objeto <code style="color:#3b82f6;background:#1a2030;padding:2px 6px;border-radius:4px">firebaseConfig</code> e cole no arquivo<br>
+          <strong style="color:#e2e8f0">Passo 4</strong> — No console: ative <strong>Authentication → E-mail/senha</strong><br>
+          <strong style="color:#e2e8f0">Passo 5</strong> — No console: ative <strong>Firestore Database</strong> (modo produção)<br>
+          <strong style="color:#e2e8f0">Passo 6</strong> — Em Firestore → Regras, cole as regras abaixo e publique
+        </div>
+        <pre style="background:#0c0f14;border:1px solid #1f2a38;border-radius:8px;padding:16px;font-size:11px;color:#94a3b8;margin-top:16px;overflow-x:auto;line-height:1.6">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Perfis: leitura própria + admin lê todos
+    match /users/{uid} {
+      allow read: if request.auth.uid == uid
+                  || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow write: if request.auth.uid == uid
+                   || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    // Avisos: admin escreve, alunos leem os seus
+    match /avisos/{avisoId} {
+      allow read: if request.auth != null;
+      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}</pre>
+        <div style="margin-top:16px;font-size:12px;color:#64748b">
+          Após configurar, crie a conta admin manualmente em Authentication → Usuários → Adicionar usuário, depois em Firestore crie o documento <code style="color:#3b82f6">users/{uid}</code> com campo <code style="color:#3b82f6">role: "admin"</code>.
+        </div>
+      </div>
+    </div>`;
+  throw new Error('Firebase não configurado');
+}
+
+// ══════════════════════════════════════════════════
+// FIREBASE DB LAYER
+// ══════════════════════════════════════════════════
+const FB = {
+  async getUser(uid) {
+    const snap = await getDoc(doc(db, 'users', uid));
+    return snap.exists() ? snap.data() : null;
+  },
+
+  async setUser(uid, data) {
+    await setDoc(doc(db, 'users', uid), data, { merge: true });
+  },
+
+  async getUserData(uid) {
+    const snap = await getDoc(doc(db, 'users', uid));
+    return snap.exists() ? snap.data() : null;
+  },
+
+  async setUserData(uid, data) {
+    await setDoc(doc(db, 'users', uid), data, { merge: true });
+  },
+
+  async updateUserData(uid, partial) {
+    await updateDoc(doc(db, 'users', uid), partial);
+  },
+
+  async getAllAlunos() {
+    const q = query(collection(db, 'users'), where('role', '==', 'aluno'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+  },
+
+  async getAvisos() {
+    const q = query(collection(db, 'avisos'), orderBy('data', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+
+  async addAviso(aviso) {
+    await addDoc(collection(db, 'avisos'), { ...aviso, data: serverTimestamp() });
+  },
+
+  async deleteAviso(id) {
+    await deleteDoc(doc(db, 'avisos', id));
+  },
+
+  async markAvisoLido(id) {
+    await updateDoc(doc(db, 'avisos', id), { lido: true });
+  }
+};
+
+// ── Fallback local para dados não-auth ──────────
+function defaultUserData(nome, concurso) {
+  return {
+    nome, concurso, role: 'aluno',
+    dataProva: '',
+    horasSemana: 20,
+    aproveitamento: 65,
+    questoesTotal: 0,
+    ultimoAcesso: new Date().toISOString(),
+    materias: [
+      { nome:'Direito Penal', topicos:['Teoria do Crime','Tipicidade','Ilicitude','Culpabilidade','Punibilidade','Crimes em espécie','LEP'], concluidos:[0,1,2] },
+      { nome:'Processo Penal', topicos:['Inquérito Policial','Ação Penal','Competência','Provas','Prisões'], concluidos:[0] },
+      { nome:'Dir. Constitucional', topicos:['Princípios Fundamentais','Direitos Fundamentais','Controle de Constitucionalidade'], concluidos:[] },
+      { nome:'Dir. Administrativo', topicos:['Princípios Admin.','Atos Administrativos','Licitação','Improbidade'], concluidos:[] },
+    ],
+    semana: [
+      [{ mat:'Direito Penal', hora:'08:00', dur:'2h', feito:true }],
+      [{ mat:'Processo Penal', hora:'14:00', dur:'2h', feito:false }],
+      [{ mat:'Dir. Constitucional', hora:'08:00', dur:'2h', feito:false }],
+      [{ mat:'Direito Penal', hora:'14:00', dur:'2h', feito:false }],
+      [{ mat:'Questões gerais', hora:'09:00', dur:'3h', feito:false }],
+      [{ mat:'Revisão semanal', hora:'09:00', dur:'2h', feito:false }],
+      [],
+    ],
+    planoAdmin: null,
+    aiHistory: [],
+    planoGerado: null,
+  };
+}
+
+// ══════════════════════════════════════════════════
+// AUTH — Firebase
+// ══════════════════════════════════════════════════
+let currentUser    = null;
+let currentProfile = null;
+
+document.getElementById('authScreen').style.display = 'none';
+document.body.insertAdjacentHTML('beforeend',
+  `<div id="initLoader" style="position:fixed;inset:0;background:#0c0f14;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px">
+     <div class="processing-ring"></div>
+     <div style="font-size:12px;color:#64748b;font-family:monospace">carregando synapse...</div>
+   </div>`);
+
+onAuthStateChanged(auth, async (fbUser) => {
+  document.getElementById('initLoader').remove();
+  if (fbUser) {
+    currentUser = fbUser;
+    const profile = await FB.getUser(fbUser.uid);
+    if (profile) { currentProfile = profile; await loginSuccess(); }
+    else { await signOut(auth); document.getElementById('authScreen').style.display = 'flex'; }
+  } else {
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+});
+
+function switchTab(tab) {
+  document.getElementById('tabLogin').style.display    = tab==='login'    ? 'block' : 'none';
+  document.getElementById('tabRegister').style.display = tab==='register' ? 'block' : 'none';
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active',(i===0)===(tab==='login')));
+  document.getElementById('authError').style.display = 'none';
+}
+function showAuthError(msg) { const el=document.getElementById('authError'); el.textContent=msg; el.style.display='block'; }
+
+async function doLogin() {
+  const email=document.getElementById('loginEmail').value.trim();
+  const senha=document.getElementById('loginPassword').value;
+  if (!email||!senha) return showAuthError('Preencha e-mail e senha.');
+  try {
+    const cred=await signInWithEmailAndPassword(auth,email,senha);
+    currentUser=cred.user;
+    currentProfile=await FB.getUser(cred.user.uid);
+    if (!currentProfile) { await signOut(auth); return showAuthError('Perfil não encontrado. Contate o administrador.'); }
+    await loginSuccess();
+  } catch(e) {
+    const msgs={'auth/user-not-found':'E-mail não cadastrado.','auth/wrong-password':'Senha incorreta.','auth/invalid-credential':'E-mail ou senha inválidos.','auth/too-many-requests':'Muitas tentativas. Tente novamente mais tarde.'};
+    showAuthError(msgs[e.code]||'Erro: '+e.message);
+  }
+}
+
+async function doRegister() {
+  const nome=document.getElementById('regNome').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const senha=document.getElementById('regPassword').value;
+  const concurso=document.getElementById('regConcurso').value.trim();
+  if (!nome||!email||!senha) return showAuthError('Preencha todos os campos obrigatórios.');
+  if (senha.length<6) return showAuthError('Senha deve ter pelo menos 6 caracteres.');
+  try {
+    const cred=await createUserWithEmailAndPassword(auth,email,senha);
+    currentUser=cred.user;
+    const data={...defaultUserData(nome,concurso),email,nome,role:'aluno',concurso};
+    await FB.setUser(cred.user.uid,data);
+    currentProfile=data;
+    await loginSuccess();
+  } catch(e) {
+    const msgs={'auth/email-already-in-use':'E-mail já cadastrado.','auth/invalid-email':'E-mail inválido.','auth/weak-password':'Senha muito fraca.'};
+    showAuthError(msgs[e.code]||'Erro: '+e.message);
+  }
+}
+
+async function loginSuccess() {
+  await FB.updateUserData(currentUser.uid,{ultimoAcesso:new Date().toISOString()});
+  currentProfile.ultimoAcesso=new Date().toISOString();
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('userName').textContent=currentProfile.nome;
+  document.getElementById('userAvatar').textContent=currentProfile.nome[0].toUpperCase();
+  document.getElementById('userRoleChip').textContent=currentProfile.role==='admin'?'administrador':'aluno';
+  if (currentProfile.role==='admin') {
+    document.getElementById('navAluno').style.display='none';
+    document.getElementById('navAdmin').style.display='block';
+    document.getElementById('sidebarRole').textContent='Admin';
+    document.getElementById('btnAI').style.display='none';
+    document.getElementById('aiFab').style.display='none';
+    await loadAdminDash();
+    showView('adminDash',document.querySelector('#navAdmin .nav-item'));
+  } else {
+    document.getElementById('navAluno').style.display='block';
+    document.getElementById('navAdmin').style.display='none';
+    renderMaterias(); renderSemana(); await loadAvisos();
+    showView('dashboard',document.querySelector('#navAluno .nav-item'));
+  }
+}
+
+async function doLogout() {
+  await saveUserData(); await signOut(auth);
+  currentUser=null; currentProfile=null;
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginPassword').value='';
+  document.getElementById('authError').style.display='none';
+}
+async function saveUserData() { if(currentUser&&currentProfile) await FB.setUserData(currentUser.uid,currentProfile); }
+
+// ═══ NAVIGATION ═══
+const TITLES={dashboard:'Dashboard',cronograma:'Cronograma',importar:'Importar Edital',edital:'Matérias & Tópicos',questoes:'Questões',desempenho:'Desempenho',avisos:'Avisos',adminDash:'Painel Admin',adminAlunos:'Alunos',adminRelatorios:'Relatórios',adminAvisos:'Avisos'};
+function showView(id,btn) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('view-'+id); if(el)el.classList.add('active');
+  if(btn)btn.classList.add('active');
+  document.getElementById('pageTitle').textContent=TITLES[id]||id;
+  if(id==='edital')renderMaterias();
+  if(id==='cronograma')renderSemana();
+  if(id==='adminDash')loadAdminDash();
+  if(id==='adminAlunos')loadAdminAlunos();
+  if(id==='adminAvisos')loadAdminAvisosList();
+  if(id==='avisos')loadAvisos();
+  if(id==='adminRelatorios')loadRelatorioSelector();
+}
+
+// ═══ MODALS ═══
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// ═══ SEMANA ═══
+const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+function renderSemana() {
+  if(!currentProfile)return;
+  const grid=document.getElementById('semanaGrid'); grid.innerHTML='';
+  const map=[6,0,1,2,3,4,5]; const hoje=new Date().getDay();
+  currentProfile.semana.forEach((blocos,di)=>{
+    const col=document.createElement('div'); col.className='dia-col';
+    const isHoje=map[hoje]===di;
+    col.innerHTML=`<div class="dia-header ${isHoje?'hoje':''}">${DIAS[di]}</div>`;
+    if(!blocos.length){col.innerHTML+=`<div class="slot-bloco" style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:10px">livre</div>`;}
+    else{blocos.forEach((b,bi)=>{col.innerHTML+=`<div class="slot-bloco ${b.feito?'feito':'ocupado'}" onclick="toggleBloco(${di},${bi})"><div class="slot-materia">${b.mat}</div><div class="slot-duracao">${b.hora}·${b.dur}${b.feito?' ✓':''}</div></div>`;});}
+    grid.appendChild(col);
+  });
+}
+async function toggleBloco(di,bi){currentProfile.semana[di][bi].feito=!currentProfile.semana[di][bi].feito;await FB.updateUserData(currentUser.uid,{semana:currentProfile.semana});renderSemana();}
+async function salvarBloco(){
+  const di=parseInt(document.getElementById('blocoDia').value);
+  const mat=document.getElementById('blocoMateria').value.trim();
+  const hora=document.getElementById('blocoHora').value;
+  const dur=document.getElementById('blocoDur').value;
+  if(!mat)return;
+  currentProfile.semana[di].push({mat,hora,dur,feito:false});
+  await FB.updateUserData(currentUser.uid,{semana:currentProfile.semana});
+  closeModal('modalBloco'); renderSemana();
+}
+
+// ═══ MATÉRIAS ═══
+function renderMaterias() {
+  if(!currentProfile)return;
+  const el=document.getElementById('materiasList'); el.innerHTML='';
+  currentProfile.materias.forEach((mat,mi)=>{
+    const pct=mat.topicos.length?Math.round(mat.concluidos.length/mat.topicos.length*100):0;
+    const bc=pct>=70?'badge-green':pct>=40?'badge-blue':'badge-amber';
+    const card=document.createElement('div'); card.className='materia-card';
+    card.innerHTML=`
+      <div class="materia-header" onclick="toggleTopicos(${mi})">
+        <div style="display:flex;align-items:center;gap:10px"><div class="materia-titulo">${mat.nome}</div><span style="font-size:11px;color:var(--text2)">${mat.topicos.length} tópicos</span></div>
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge ${bc}">${pct}% concluído</span><span style="color:var(--text2);font-size:12px">▾</span></div>
+      </div>
+      <div class="topicos-list" id="topicos-${mi}">
+        ${mat.topicos.map((t,ti)=>`<div class="topico-item"><div class="topico-check ${mat.concluidos.includes(ti)?'done':''}" onclick="toggleTopico(${mi},${ti})">${mat.concluidos.includes(ti)?'✓':''}</div><span style="${mat.concluidos.includes(ti)?'text-decoration:line-through;opacity:.5':''}">${t}</span></div>`).join('')}
+      </div>`;
+    el.appendChild(card);
+  });
+}
+function toggleTopicos(mi){const el=document.getElementById('topicos-'+mi);el.style.display=el.style.display==='block'?'none':'block';}
+async function toggleTopico(mi,ti){const mat=currentProfile.materias[mi];const idx=mat.concluidos.indexOf(ti);idx>=0?mat.concluidos.splice(idx,1):mat.concluidos.push(ti);await FB.updateUserData(currentUser.uid,{materias:currentProfile.materias});renderMaterias();document.getElementById('topicos-'+mi).style.display='block';}
+async function salvarMateria(){const nome=document.getElementById('matNome').value.trim();const topicos=document.getElementById('matTopicos').value.trim().split('\n').filter(Boolean);if(!nome)return;currentProfile.materias.push({nome,topicos,concluidos:[]});await FB.updateUserData(currentUser.uid,{materias:currentProfile.materias});closeModal('modalMateria');renderMaterias();showView('edital',null);}
+
+// ═══ QUESTÕES ═══
+function responder(qid,idx,correta){const alts=document.getElementById('alts-'+qid).querySelectorAll('.alternativa');alts.forEach((a,i)=>{a.onclick=null;if(i===idx)a.classList.add(correta?'correta':'errada');else if(!correta&&i===2)a.classList.add('correta');});}
+function gerarExplicacaoIA(tema){openAI();setTimeout(()=>{document.getElementById('aiInput').value=`Explique detalhadamente: "${tema}". Inclua base legal, jurisprudência e pegadinhas de banca.`;sendAI();},300);}
+
+// ═══ AVISOS ALUNO ═══
+async function loadAvisos(){
+  if(!currentUser||currentProfile?.role==='admin')return;
+  const todos=await FB.getAvisos();
+  const meus=todos.filter(a=>a.para==='todos'||a.para===currentUser.uid);
+  const el=document.getElementById('avisosList');
+  if(!meus.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">🔔</div>Nenhum aviso ainda</div>';return;}
+  const naolidos=meus.filter(a=>!a.lido);
+  if(naolidos.length){const badge=document.getElementById('notifyBadge');badge.textContent=naolidos.length;badge.style.display='inline-flex';document.getElementById('dashAvisoAlert').style.display='block';document.getElementById('dashAvisoText').textContent=' '+naolidos[0].titulo;for(const a of naolidos)await FB.markAvisoLido(a.id);}
+  const icons={info:'ℹ️',alerta:'⚠️',tarefa:'📝',elogio:'🏆'};
+  el.innerHTML=meus.map(a=>{const ds=a.data?.toDate?a.data.toDate().toLocaleDateString('pt-BR'):new Date(a.data||Date.now()).toLocaleDateString('pt-BR');return `<div class="aviso-card"><div class="aviso-header"><div class="aviso-titulo">${icons[a.tipo]||'📢'} ${a.titulo}</div><div class="aviso-meta">${ds}</div></div><div class="aviso-body">${a.mensagem}</div></div>`;}).join('');
+}
+
+// ═══ ADMIN DASHBOARD ═══
+let _cachedAlunos=[];
+async function loadAdminDash(){
+  const alunos=await FB.getAllAlunos(); _cachedAlunos=alunos;
+  const avisos=await FB.getAvisos();
+  document.getElementById('adminTotalAlunos').textContent=alunos.length;
+  document.getElementById('adminTotalAvisos').textContent=avisos.length;
+  document.getElementById('adminTotalPlanos').textContent=alunos.filter(u=>u.planoGerado).length;
+  if(!alunos.length){document.getElementById('adminMediaAprov').textContent='—';document.getElementById('adminRankingBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text2)">Nenhum aluno cadastrado</td></tr>';document.getElementById('adminAlertaAlunos').innerHTML='<div class="empty-state"><div class="empty-icon">✅</div>Nenhum aluno cadastrado</div>';return;}
+  const media=Math.round(alunos.reduce((s,u)=>s+(u.aproveitamento||60),0)/alunos.length);
+  document.getElementById('adminMediaAprov').textContent=media+'%';
+  const sorted=[...alunos].sort((a,b)=>(b.aproveitamento||0)-(a.aproveitamento||0));
+  document.getElementById('adminRankingBody').innerHTML=sorted.map((u,i)=>{const aprov=u.aproveitamento||60;const bc=aprov>=70?'badge-green':aprov>=60?'badge-blue':'badge-amber';const ult=u.ultimoAcesso?new Date(u.ultimoAcesso).toLocaleDateString('pt-BR'):'—';return `<tr><td style="color:var(--text2);font-family:var(--mono)">${i+1}</td><td style="color:var(--text);font-weight:500">${u.nome}</td><td>${u.concurso||'—'}</td><td><span class="badge ${bc}">${aprov}%</span></td><td style="font-family:var(--mono);color:var(--accent)">${u.horasSemana||0}h</td><td>${ult}</td><td><button class="btn btn-ghost btn-sm" onclick="verAlunoDetalhe('${u.uid}')">Ver →</button></td></tr>`;}).join('');
+  const baixos=alunos.filter(u=>(u.aproveitamento||60)<60);
+  const alertaEl=document.getElementById('adminAlertaAlunos');
+  if(!baixos.length){alertaEl.innerHTML='<div class="empty-state" style="padding:20px"><div class="empty-icon">✅</div>Todos acima de 60%</div>';}
+  else{alertaEl.innerHTML=baixos.map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div class="user-avatar" style="width:30px;height:30px;font-size:11px">${u.nome[0]}</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">${u.nome}</div><div style="font-size:11px;color:var(--text2)">${u.concurso||'—'} · ${u.aproveitamento||60}%</div></div><button class="btn btn-ghost btn-sm" onclick="abrirEnviarAviso('${u.uid}','${u.nome}')">Enviar aviso</button><button class="btn btn-primary btn-sm" onclick="verAlunoDetalhe('${u.uid}')">Ver perfil</button></div>`).join('');}
+}
+
+// ═══ ADMIN ALUNOS ═══
+async function loadAdminAlunos(){
+  document.getElementById('adminAlunosList').style.display='block';
+  document.getElementById('adminAlunoDetalhe').style.display='none';
+  _cachedAlunos=await FB.getAllAlunos();
+  const sel=document.getElementById('avisoDestinatario');
+  sel.innerHTML='<option value="todos">Todos os alunos</option>'+_cachedAlunos.map(u=>`<option value="${u.uid}">${u.nome}</option>`).join('');
+  const grid=document.getElementById('alunosGrid');
+  if(!_cachedAlunos.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">👥</div>Nenhum aluno cadastrado ainda.</div>';return;}
+  grid.innerHTML=_cachedAlunos.map(u=>{const aprov=u.aproveitamento||60;const bc=aprov>=70?'badge-green':aprov>=60?'badge-blue':'badge-amber';const pct=u.materias?Math.round(u.materias.reduce((s,m)=>s+(m.concluidos.length/Math.max(m.topicos.length,1)),0)/u.materias.length*100):0;return `<div class="aluno-card" onclick="verAlunoDetalhe('${u.uid}')"><div class="aluno-card-header"><div class="user-avatar" style="width:36px;height:36px;font-size:13px">${u.nome[0]}</div><div class="aluno-card-info"><div class="aluno-card-nome">${u.nome}</div><div class="aluno-card-meta">${u.email||''}</div></div><span class="badge ${bc}">${aprov}%</span></div><div style="font-size:11px;color:var(--text2);margin-bottom:8px">${u.concurso||'Sem concurso definido'}</div><div class="progress-track" style="height:3px"><div class="progress-fill" style="width:${pct}%"></div></div><div style="font-size:10px;color:var(--text2);margin-top:4px">${pct}% do edital concluído</div></div>`;}).join('');
+}
+
+async function verAlunoDetalhe(uid){
+  const u=_cachedAlunos.find(x=>x.uid===uid)||await FB.getUserData(uid)||{};
+  document.getElementById('adminAlunosList').style.display='none';
+  document.getElementById('adminAlunoDetalhe').style.display='block';
+  const aprov=u.aproveitamento||60;
+  const pct=u.materias?Math.round(u.materias.reduce((s,m)=>s+(m.concluidos.length/Math.max(m.topicos.length,1)),0)/u.materias.length*100):0;
+  const planoAdmin=u.planoAdmin;
+  document.getElementById('alunoDetalheContent').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div style="display:flex;gap:16px;align-items:center"><div class="user-avatar" style="width:48px;height:48px;font-size:18px;border-radius:12px">${u.nome[0]}</div><div><div style="font-size:18px;font-weight:700">${u.nome}</div><div style="font-size:12px;color:var(--text2)">${u.email||''} · ${u.concurso||'Sem concurso'}</div></div></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" onclick="abrirEnviarAviso('${uid}','${u.nome}')">📢 Enviar aviso</button><button class="btn btn-primary btn-sm" onclick="abrirEditarPlano('${uid}','${u.nome}')">✏️ Editar plano</button></div>
+    </div>
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">Aproveitamento</div><div class="stat-value ${aprov>=70?'c-green':aprov>=60?'c-accent':'c-red'}">${aprov}%</div></div>
+      <div class="stat-card"><div class="stat-label">Edital concluído</div><div class="stat-value">${pct}%</div></div>
+      <div class="stat-card"><div class="stat-label">Questões</div><div class="stat-value c-accent">${u.questoesTotal||0}</div></div>
+      <div class="stat-card"><div class="stat-label">Horas/semana</div><div class="stat-value c-amber">${u.horasSemana||0}h</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">Matérias</div>${(u.materias||[]).map(m=>{const p=m.topicos.length?Math.round(m.concluidos.length/m.topicos.length*100):0;return `<div class="materia-row"><div class="materia-name">${m.nome}</div><div class="progress-track"><div class="progress-fill ${p>=70?'green':p>=40?'':'amber'}" style="width:${p}%"></div></div><div class="materia-pct">${p}%</div></div>`;}).join('')}</div>
+      <div class="card"><div class="card-title">Plano do instrutor</div>${planoAdmin?`<div style="font-size:12px;color:var(--text3);line-height:1.7">${planoAdmin.concurso?`<div><strong style="color:var(--text)">Concurso:</strong> ${planoAdmin.concurso}</div>`:''} ${planoAdmin.dataProva?`<div><strong style="color:var(--text)">Data prova:</strong> ${new Date(planoAdmin.dataProva+'T00:00').toLocaleDateString('pt-BR')}</div>`:''} ${planoAdmin.materias?`<div style="margin-top:8px"><strong style="color:var(--text)">Prioridades:</strong><br>${planoAdmin.materias}</div>`:''} ${planoAdmin.obs?`<div style="margin-top:8px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15);border-radius:6px;padding:10px">${planoAdmin.obs}</div>`:''}</div>`:'<div class="empty-state" style="padding:20px;font-size:12px"><div class="empty-icon" style="font-size:24px">📋</div>Nenhum plano definido ainda</div>'}</div>
+    </div>`;
+}
+function voltarListaAlunos(){document.getElementById('adminAlunosList').style.display='block';document.getElementById('adminAlunoDetalhe').style.display='none';}
+
+async function adminCriarAluno(){
+  const nome=document.getElementById('criarNome').value.trim();
+  const email=document.getElementById('criarEmail').value.trim().toLowerCase();
+  const senha=document.getElementById('criarSenha').value;
+  const concurso=document.getElementById('criarConcurso').value.trim();
+  if(!nome||!email||!senha)return alert('Preencha todos os campos obrigatórios.');
+  if(senha.length<6)return alert('Senha deve ter pelo menos 6 caracteres.');
+  try{
+    const res=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_CONFIG.apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:senha,returnSecureToken:true})});
+    const data=await res.json();
+    if(data.error)return alert('Erro: '+data.error.message);
+    await FB.setUser(data.localId,{...defaultUserData(nome,concurso),email,nome,role:'aluno',concurso});
+    closeModal('modalCriarAluno');
+    await loadAdminAlunos(); await loadAdminDash();
+    alert(`Aluno "${nome}" criado!`);
+  }catch(e){alert('Erro: '+e.message);}
+}
+
+// ═══ EDITAR PLANO ═══
+async function abrirEditarPlano(uid,nome){
+  const u=await FB.getUserData(uid)||{}; const p=u.planoAdmin||{};
+  document.getElementById('editarPlanoUid').value=uid;
+  document.getElementById('editarPlanoAluno').textContent=nome;
+  document.getElementById('epConcurso').value=p.concurso||u.concurso||'';
+  document.getElementById('epData').value=p.dataProva||'';
+  document.getElementById('epMaterias').value=p.materias||(u.materias||[]).map(m=>m.nome).join('\n');
+  document.getElementById('epObs').value=p.obs||'';
+  openModal('modalEditarPlano');
+}
+async function salvarPlanoAluno(){
+  const uid=document.getElementById('editarPlanoUid').value;
+  const planoAdmin={concurso:document.getElementById('epConcurso').value.trim(),dataProva:document.getElementById('epData').value,materias:document.getElementById('epMaterias').value.trim(),obs:document.getElementById('epObs').value.trim(),atualizadoEm:new Date().toISOString()};
+  await FB.updateUserData(uid,{planoAdmin});
+  const idx=_cachedAlunos.findIndex(u=>u.uid===uid);if(idx>=0)_cachedAlunos[idx].planoAdmin=planoAdmin;
+  closeModal('modalEditarPlano');
+  if(document.getElementById('adminAlunoDetalhe').style.display!=='none')verAlunoDetalhe(uid);
+  alert('Plano atualizado!');
+}
+
+// ═══ AVISOS ADMIN ═══
+async function abrirEnviarAviso(uid,nome){
+  if(!_cachedAlunos.length)_cachedAlunos=await FB.getAllAlunos();
+  const sel=document.getElementById('avisoDestinatario');
+  sel.innerHTML='<option value="todos">Todos os alunos</option>'+_cachedAlunos.map(u=>`<option value="${u.uid}">${u.nome}</option>`).join('');
+  sel.value=uid; openModal('modalNovoAviso');
+}
+async function enviarAviso(){
+  const para=document.getElementById('avisoDestinatario').value;
+  const titulo=document.getElementById('avisoTitulo').value.trim();
+  const mensagem=document.getElementById('avisoMensagem').value.trim();
+  const tipo=document.getElementById('avisoTipo').value;
+  if(!titulo||!mensagem)return alert('Preencha título e mensagem.');
+  await FB.addAviso({para,titulo,mensagem,tipo,lido:false,de:'admin'});
+  document.getElementById('avisoTitulo').value=''; document.getElementById('avisoMensagem').value='';
+  closeModal('modalNovoAviso'); await loadAdminAvisosList(); await loadAdminDash();
+  alert(`Aviso enviado${para==='todos'?' para todos':' ao aluno selecionado'}!`);
+}
+async function loadAdminAvisosList(){
+  const avisos=await FB.getAvisos(); const el=document.getElementById('adminAvisosList');
+  if(!avisos.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📢</div>Nenhum aviso enviado ainda</div>';return;}
+  const icons={info:'ℹ️',alerta:'⚠️',tarefa:'📝',elogio:'🏆'};
+  el.innerHTML=avisos.map(a=>{const dest=a.para==='todos'?'Todos os alunos':(_cachedAlunos.find(u=>u.uid===a.para)?.nome||a.para);const ds=a.data?.toDate?a.data.toDate().toLocaleDateString('pt-BR'):new Date(a.data||Date.now()).toLocaleDateString('pt-BR');return `<div class="aviso-card"><div class="aviso-header"><div class="aviso-titulo">${icons[a.tipo]||'📢'} ${a.titulo}</div><div style="display:flex;gap:8px;align-items:center"><div class="aviso-meta">${ds}</div><button class="btn btn-danger btn-sm" onclick="deletarAviso('${a.id}')">✕</button></div></div><div class="aviso-body">${a.mensagem}</div><div class="aviso-destinatario"><span class="badge badge-purple">Para: ${dest}</span></div></div>`;}).join('');
+}
+async function deletarAviso(id){if(!confirm('Deletar este aviso?'))return;await FB.deleteAviso(id);await loadAdminAvisosList();}
+
+// ═══ IMPORT EDITAL ═══
+function handleDrag(e,on){e.preventDefault();document.getElementById('dropZone').classList.toggle('drag',on);}
+function handleDrop(e){e.preventDefault();document.getElementById('dropZone').classList.remove('drag');if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0]);}
+function handleFile(input){if(input.files[0])readFile(input.files[0]);}
+function readFile(file){document.getElementById('fileName').textContent='📎 '+file.name;document.getElementById('fileName').style.display='block';const r=new FileReader();r.onload=e=>{document.getElementById('editalText').value=(e.target.result||'').substring(0,12000);};r.readAsText(file,'UTF-8');}
+function animateSteps(durs){let cum=0;durs.forEach((ms,i)=>{setTimeout(()=>{if(i>0){const p=document.getElementById(`ps${i}`);p.classList.remove('active');p.classList.add('done');}document.getElementById(`ps${i+1}`).classList.add('active');},cum);cum+=ms;});}
+
+async function processarEdital(){
+  const texto=document.getElementById('editalText').value.trim();
+  if(!texto||texto.length<50)return alert('Cole o texto do edital ou selecione um arquivo.');
+  const concurso=document.getElementById('impConcurso').value.trim()||'Concurso';
+  const dataProva=document.getElementById('impData').value;
+  const horasDia=document.getElementById('impHoras').value;
+  const diasRestantes=dataProva?Math.round((new Date(dataProva)-new Date())/86400000):null;
+  for(let i=1;i<=5;i++){const e=document.getElementById('ps'+i);e.className='pstep';}
+  document.getElementById('processingOverlay').classList.add('open');
+  animateSteps([0,1200,2400,3600,4800]);
+  const sysP=`Você é um estrategista de concursos públicos jurídicos brasileiros. Responda APENAS com JSON válido, sem markdown.\nJSON:{"concurso":"string","banca":"string","totalMaterias":number,"alertas":["string"],"materias":[{"nome":"string","prioridade":1,"peso":"XX%","questoesEstimadas":number,"topicos":["string"],"justificativa":"string"}],"fases":[{"numero":1,"nome":"string","periodo":"string","foco":"string","horasSemana":number,"metodo":"string"}],"semanaModelo":[{"dia":"Seg","materia":"string","topico":"string","horas":number}],"insights":"string"}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sysP,messages:[{role:'user',content:`CONCURSO:${concurso}\nDATA:${dataProva||'não informada'}${diasRestantes?` (${diasRestantes} dias)`:''}\nHORAS/DIA:${horasDia}h\n\nEDITAL:\n${texto.substring(0,8000)}`}]})});
+    const data=await res.json();
+    let raw=(data.content?.[0]?.text||'').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    let plano;try{plano=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]*\}/);if(m)plano=JSON.parse(m[0]);else throw new Error('JSON inválido');}
+    document.getElementById('processingOverlay').classList.remove('open');
+    currentProfile.planoGerado=plano;
+    await FB.updateUserData(currentUser.uid,{planoGerado:plano});
+    renderPlano(plano,concurso,dataProva,diasRestantes,horasDia);
+  }catch(err){document.getElementById('processingOverlay').classList.remove('open');alert('Erro: '+err.message);}
+}
+
+function renderPlano(plano,concurso,dataProva,diasRestantes,horasDia){
+  document.getElementById('planoTitulo').textContent=plano.concurso||concurso;
+  let meta=`${plano.totalMaterias||plano.materias?.length||'?'} matérias · ${horasDia}h/dia`;if(diasRestantes!==null)meta+=` · ${diasRestantes} dias restantes`;if(plano.banca)meta+=` · ${plano.banca}`;document.getElementById('planoMeta').textContent=meta;
+  const grid=document.getElementById('priorityGrid');grid.innerHTML='';(plano.materias||[]).slice(0,9).forEach(m=>{const pc=m.prioridade===1?'p1':m.prioridade===2?'p2':'p3';const label=m.prioridade===1?'ALTA':m.prioridade===2?'MÉDIA':'COMPLEMENTAR';grid.innerHTML+=`<div class="priority-card ${pc}"><div class="priority-label">${label}</div><div class="priority-mat">${m.nome}</div><div class="priority-info">${m.peso||''} ${m.questoesEstimadas?`· ~${m.questoesEstimadas}q`:''}${m.justificativa?`<br><span style="font-size:10px;opacity:.7">${m.justificativa.substring(0,80)}</span>`:''}</div></div>`;});
+  const tbody=document.getElementById('planoFases');tbody.innerHTML='';(plano.fases||[]).forEach(f=>{tbody.innerHTML+=`<tr><td><span class="fase-badge fase-${Math.min(f.numero,4)}">Fase ${f.numero}: ${f.nome}</span></td><td style="color:var(--text)">${f.periodo}</td><td>${f.foco}</td><td style="color:var(--accent);font-family:var(--mono)">${f.horasSemana}h</td><td>${f.metodo}</td></tr>`;});
+  const semEl=document.getElementById('semanaPlano');semEl.innerHTML='';(plano.semanaModelo||[]).forEach(d=>{const isDom=d.dia==='Dom';semEl.innerHTML+=`<div style="display:flex;flex-direction:column;gap:4px"><div style="text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:${isDom?'var(--text2)':'var(--text3)'};font-family:var(--mono);padding:4px">${d.dia}</div><div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px;min-height:65px;${isDom?'opacity:.5':''}"><div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px">${d.materia||'—'}</div><div style="font-size:10px;color:var(--text2);margin-bottom:4px">${d.topico||''}</div><div style="font-family:var(--mono);font-size:10px;color:var(--accent)">${d.horas?d.horas+'h':''}</div></div></div>`;});
+  document.getElementById('planoInsights').innerHTML=(plano.insights||'').replace(/\n/g,'<br>');
+  document.getElementById('importForm').style.display='none';document.getElementById('planoContainer').classList.add('show');
+}
+
+async function aplicarPlano(){
+  const plano=currentProfile?.planoGerado;if(!plano)return;
+  if(plano.materias?.length){plano.materias.forEach(m=>{if(!currentProfile.materias.find(e=>e.nome.toLowerCase()===m.nome.toLowerCase()))currentProfile.materias.push({nome:m.nome,topicos:m.topicos||[],concluidos:[],prioridade:m.prioridade});});}
+  const diasMap={Seg:0,Ter:1,Qua:2,Qui:3,Sex:4,'Sáb':5,Dom:6};
+  if(plano.semanaModelo?.length===7){plano.semanaModelo.forEach(d=>{const di=diasMap[d.dia];if(di!==undefined&&d.materia&&d.materia!=='—'&&d.horas)currentProfile.semana[di]=[{mat:d.materia,hora:'08:00',dur:d.horas+'h',feito:false}];});}
+  await FB.updateUserData(currentUser.uid,{materias:currentProfile.materias,semana:currentProfile.semana});
+  alert('✓ Plano aplicado e salvo!');
+}
+function resetImport(){document.getElementById('importForm').style.display='block';document.getElementById('planoContainer').classList.remove('show');document.getElementById('editalText').value='';document.getElementById('fileName').style.display='none';}
+
+// ═══ AI PANEL ═══
+function openAI(){document.getElementById('aiPanel').classList.add('open');document.getElementById('aiFab').style.display='none';}
+function closeAI(){document.getElementById('aiPanel').classList.remove('open');document.getElementById('aiFab').style.display='flex';}
+function handleAIKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAI();}}
+function sendSuggestion(t){document.getElementById('aiInput').value=t;sendAI();}
+async function sendAI(){
+  const input=document.getElementById('aiInput');const msg=input.value.trim();if(!msg)return;input.value='';
+  const btn=document.getElementById('aiSendBtn');btn.disabled=true;
+  appendMsg('user',msg);const thinking=appendThinking();
+  if(!currentProfile.aiHistory)currentProfile.aiHistory=[];
+  currentProfile.aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:`Você é assistente de estudos para concursos públicos jurídicos brasileiros. O usuário é ${currentProfile?.nome||'estudante'}${currentProfile?.concurso?`, preparando-se para ${currentProfile.concurso}`:''} (delegado de polícia ativo). Seja direto, técnico, cite artigos e jurisprudência quando relevante.`,messages:currentProfile.aiHistory})});
+    const data=await res.json();const reply=data.content?.[0]?.text||'Erro.';
+    thinking.remove();appendMsg('ai',reply);currentProfile.aiHistory.push({role:'assistant',content:reply});
+    if(currentProfile.aiHistory.length>20)currentProfile.aiHistory=currentProfile.aiHistory.slice(-18);
+    await FB.updateUserData(currentUser.uid,{aiHistory:currentProfile.aiHistory});
+  }catch{thinking.remove();appendMsg('ai','Erro ao conectar com a IA.');}
+  btn.disabled=false;
+}
+function appendMsg(role,text){const el=document.createElement('div');el.className=`msg msg-${role}`;el.innerHTML=`<div class="msg-label">${role==='user'?'VOCÊ':'IA'}</div>${escHtml(text).replace(/\n/g,'<br>')}`;const msgs=document.getElementById('aiMessages');msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;return el;}
+function appendThinking(){const el=document.createElement('div');el.className='msg msg-ai';el.innerHTML=`<div class="msg-label">IA</div><div class="thinking"><span></span><span></span><span></span></div>`;const msgs=document.getElementById('aiMessages');msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;return el;}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══ RELATÓRIOS ═══
+let relCurrentUid=null;
+async function loadRelatorioSelector(){
+  if(!_cachedAlunos.length)_cachedAlunos=await FB.getAllAlunos();
+  const sel=document.getElementById('relAlunoSelect');
+  sel.innerHTML='<option value="">— Selecione um aluno —</option>'+_cachedAlunos.map(u=>`<option value="${u.uid}">${u.nome} — ${u.concurso||'sem concurso'}</option>`).join('');
+  document.getElementById('relEmpty').style.display='flex';document.getElementById('relatorioBody').style.display='none';
+  document.getElementById('btnGerarDiag').style.display='none';document.getElementById('btnImprimirRel').style.display='none';relCurrentUid=null;
+}
+async function onRelAlunoChange(){
+  const uid=document.getElementById('relAlunoSelect').value;
+  if(!uid){document.getElementById('relEmpty').style.display='flex';document.getElementById('relatorioBody').style.display='none';document.getElementById('btnGerarDiag').style.display='none';document.getElementById('btnImprimirRel').style.display='none';relCurrentUid=null;return;}
+  relCurrentUid=uid;
+  const u=await FB.getUserData(uid)||{};const idx=_cachedAlunos.findIndex(x=>x.uid===uid);if(idx>=0)_cachedAlunos[idx]={..._cachedAlunos[idx],...u};
+  renderRelatorio({...u,uid});
+  document.getElementById('btnGerarDiag').style.display='inline-flex';document.getElementById('btnImprimirRel').style.display='inline-flex';
+}
+function renderRelatorio(u){
+  document.getElementById('relEmpty').style.display='none';document.getElementById('relatorioBody').style.display='block';
+  document.getElementById('relNome').textContent=u.nome||'—';document.getElementById('relConcurso').textContent=u.concurso||'Concurso não definido';
+  document.getElementById('relData').textContent='Relatório gerado em '+new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('relGeradoEm').textContent=new Date().toLocaleDateString('pt-BR');
+  const aprov=u.aproveitamento||60;const statusBadge=document.getElementById('relStatusBadge');
+  if(aprov>=70){statusBadge.textContent='✓ Bom desempenho';statusBadge.className='badge badge-green';}else if(aprov>=60){statusBadge.textContent='→ Desempenho regular';statusBadge.className='badge badge-blue';}else{statusBadge.textContent='⚠ Atenção necessária';statusBadge.className='badge badge-red';}
+  const editalPct=u.materias?Math.round(u.materias.reduce((s,m)=>s+(m.concluidos.length/Math.max(m.topicos.length,1)),0)/u.materias.length*100):0;
+  document.getElementById('relAprov').textContent=aprov+'%';document.getElementById('relAprov').style.color=aprov>=70?'var(--green)':aprov>=60?'var(--accent)':'var(--red)';
+  document.getElementById('relEdital').textContent=editalPct+'%';document.getElementById('relQuestoes').textContent=(u.questoesTotal||0).toLocaleString('pt-BR');document.getElementById('relHoras').textContent=(u.horasSemana||0)+'h';
+  const planoAdmin=u.planoAdmin;const diasEl=document.getElementById('relDias'),diasSubEl=document.getElementById('relDiasSub');const dataProva=planoAdmin?.dataProva||u.dataProva;
+  if(dataProva){const dias=Math.round((new Date(dataProva)-new Date())/86400000);diasEl.textContent=Math.max(0,dias);diasSubEl.textContent=dias>0?'restantes':'prova passou';diasEl.style.color=dias<30?'var(--red)':dias<90?'var(--amber)':'var(--purple)';}else{diasEl.textContent='—';diasSubEl.textContent='sem data';}
+  const mats=u.materias||[];
+  document.getElementById('relMaterias').innerHTML=mats.length?mats.map(m=>{const pct=m.topicos.length?Math.round(m.concluidos.length/m.topicos.length*100):0;const aprM=Math.max(40,Math.min(95,aprov+((Math.random()*20-10)|0)));const color=pct>=70?'#22c55e':pct>=40?'#3b82f6':'#f59e0b';return `<div class="mat-rel-row"><div class="mat-rel-name">${m.nome}</div><div class="mat-rel-bar"><div class="mat-rel-fill" style="width:${pct}%;background:${color}"></div></div><div class="mat-rel-pct">${pct}%</div><div class="mat-rel-badge"><span class="badge ${pct>=70?'badge-green':pct>=40?'badge-blue':'badge-amber'}" style="font-size:9px">${aprM}%</span></div></div>`;}).join(''):'<div style="font-size:12px;color:var(--text2);padding:12px 0">Nenhuma matéria cadastrada</div>';
+  const metas=[{label:'Aproveitamento',atual:aprov,meta:70,unit:'%'},{label:'Edital concluído',atual:editalPct,meta:60,unit:'%'},{label:'Horas/semana',atual:u.horasSemana||0,meta:30,unit:'h'},{label:'Questões',atual:u.questoesTotal||0,meta:500,unit:''}];
+  document.getElementById('relMetas').innerHTML=metas.map(m=>{const ok=m.atual>=m.meta;const pct=Math.min(100,Math.round(m.atual/m.meta*100));return `<div class="meta-row"><div class="meta-label">${m.label}</div><div class="meta-status"><div style="width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${ok?'var(--green)':'var(--amber)'};border-radius:2px"></div></div><span class="meta-val" style="color:${ok?'var(--green)':'var(--amber)'}">${m.atual}${m.unit}</span><span style="font-size:10px;color:var(--text2)">/ ${m.meta}${m.unit}</span></div></div>`;}).join('');
+  const base=u.horasSemana||20;const semanas=['S-6','S-5','S-4','S-3','S-2','S-1','Atual'];const vals=semanas.map((_,i)=>Math.max(5,Math.round(base*(0.6+Math.random()*0.8))));vals[6]=base;const maxV=Math.max(...vals);
+  document.getElementById('relHorasBars').innerHTML=semanas.map((s,i)=>`<div class="hora-bar-wrap"><div class="hora-bar ${i===6?'atual':''}" style="height:${Math.round(vals[i]/maxV*70)+10}px"></div><div class="hora-bar-label">${s}</div></div>`).join('');
+  const questTotal=u.questoesTotal||0;
+  document.getElementById('relQuestoesBody').innerHTML=mats.length?mats.map(m=>{const share=Math.round(questTotal/mats.length*(0.8+Math.random()*0.4));const aprM=Math.max(40,Math.min(95,aprov+((Math.random()*20-10)|0)));const bc=aprM>=70?'badge-green':aprM>=60?'badge-blue':'badge-amber';const acao=aprM<55?'Intensificar questões':aprM<65?'Revisar teoria':'Manter ritmo';return `<tr><td style="color:var(--text);font-weight:500">${m.nome}</td><td style="font-family:var(--mono)">${share}</td><td style="font-family:var(--mono);color:var(--green)">${Math.round(share*aprM/100)}</td><td><span class="badge ${bc}">${aprM}%</span></td><td>${aprM>=70?'<span style="color:var(--green)">✓</span>':aprM>=60?'<span style="color:var(--amber)">→</span>':'<span style="color:var(--red)">⚠</span>'}</td><td style="font-size:11px;color:var(--text2)">${acao}</td></tr>`;}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text2)">Sem dados</td></tr>';
+  if(planoAdmin){document.getElementById('relPlanoAdmin').style.display='block';document.getElementById('relPlanoAdminContent').innerHTML=`${planoAdmin.concurso?`<div><strong>Concurso:</strong> ${planoAdmin.concurso}</div>`:''}${planoAdmin.dataProva?`<div><strong>Data prova:</strong> ${new Date(planoAdmin.dataProva+'T00:00').toLocaleDateString('pt-BR')}</div>`:''}${planoAdmin.materias?`<div style="margin-top:6px"><strong>Prioridades:</strong><br>${planoAdmin.materias.replace(/\n/g,'<br>')}</div>`:''}${planoAdmin.obs?`<div style="margin-top:8px;padding:10px;background:rgba(99,102,241,.06);border-radius:6px">${planoAdmin.obs}</div>`:''}`;}
+  else document.getElementById('relPlanoAdmin').style.display='none';
+  document.getElementById('diagContent').innerHTML='<div style="font-size:12px;color:var(--text2)">Clique em "Gerar diagnóstico IA" para obter uma análise personalizada.</div>';
+}
+async function gerarDiagnosticoIA(){
+  if(!relCurrentUid)return;
+  const u=_cachedAlunos.find(x=>x.uid===relCurrentUid)||{};
+  const diagBox=document.getElementById('diagContent');
+  diagBox.innerHTML=`<div class="diagnostico-loading"><div class="processing-ring" style="width:24px;height:24px;border-width:2px"></div> Gerando diagnóstico com IA...</div>`;
+  const mats=(u.materias||[]).map(m=>{const pct=m.topicos.length?Math.round(m.concluidos.length/m.topicos.length*100):0;return `${m.nome}: ${pct}% (${m.concluidos.length}/${m.topicos.length} tópicos)`;}).join('\n');
+  const prompt=`Você é um coach especialista em concursos públicos jurídicos brasileiros. Analise e gere diagnóstico.\n\nALUNO: ${u.nome}\nCONCURSO: ${u.concurso||'não definido'}\nAPROVEITAMENTO: ${u.aproveitamento||60}%\nQUESTÕES: ${u.questoesTotal||0}\nHORAS/SEMANA: ${u.horasSemana||0}h\nMATÉRIAS:\n${mats||'Sem dados'}\n${u.planoAdmin?.obs?`\nINSTRUTOR:\n${u.planoAdmin.obs}`:''}\n\nResponda em JSON: {"pontosFortres":"string","pontosFracos":"string","recomendacoes":"string","alertas":"string","previsao":"string"}\nAPENAS JSON, sem markdown.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();let raw=(data.content?.[0]?.text||'').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    let diag;try{diag=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]*\}/);diag=m?JSON.parse(m[0]):null;}
+    if(!diag)throw new Error('JSON inválido');
+    diagBox.innerHTML=`
+      <div class="diag-section"><div class="diag-section-title green">✓ Pontos Fortes</div><div class="diag-text">${(diag.pontosFortres||'').replace(/\n/g,'<br>')}</div></div>
+      <div class="diag-section"><div class="diag-section-title red">⚠ Pontos de Atenção</div><div class="diag-text">${(diag.pontosFracos||'').replace(/\n/g,'<br>')}</div></div>
+      <div class="diag-section"><div class="diag-section-title blue">→ Recomendações</div><div class="diag-text">${(diag.recomendacoes||'').replace(/\n/g,'<br>')}</div></div>
+      <div class="diag-section"><div class="diag-section-title amber">⚡ Alertas</div><div class="diag-text">${(diag.alertas||'').replace(/\n/g,'<br>')}</div></div>
+      <div class="diag-section"><div class="diag-section-title" style="color:var(--purple)">🎯 Previsão</div><div class="diag-text">${(diag.previsao||'').replace(/\n/g,'<br>')}</div></div>`;
+  }catch(err){diagBox.innerHTML=`<div style="font-size:12px;color:var(--red)">Erro: ${err.message}</div>`;}
+}
+function imprimirRelatorio(){if(relCurrentUid)window.print();}
+</script>
+</body>
+</html>
