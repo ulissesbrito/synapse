@@ -1050,18 +1050,15 @@ const FB = {
 // ── Fallback local para dados não-auth ──────────
 function defaultUserData(nome, concurso) {
   return {
-    nome, concurso, role: 'aluno',
+    nome,
+    concurso,
+    role: 'aluno',
     email: '',
     dataProva: '',
     horasSemana: 0,
     aproveitamento: 65,
     questoesTotal: 0,
     ultimoAcesso: new Date().toISOString(),
-    materias: [],
-    semana: [[], [], [], [], [], [], []],
-    planoAdmin: null,
-    aiHistory: [],
-    planoGerado: null,
   };
 }
 
@@ -1135,13 +1132,21 @@ async function doRegister() {
 }
 
 async function loginSuccess() {
-  await FB.updateUserData(currentUser.uid,{ultimoAcesso:new Date().toISOString()});
-  currentProfile.ultimoAcesso=new Date().toISOString();
+  await FB.updateUserData(currentUser.uid, { ultimoAcesso: new Date().toISOString() });
+  currentProfile.ultimoAcesso = new Date().toISOString();
+
+  // preenche campos ausentes localmente (sem salvar arrays no Firestore)
+  if (!currentProfile.materias)  currentProfile.materias  = [];
+  if (!currentProfile.aiHistory) currentProfile.aiHistory = [];
+  if (!currentProfile.semana || !Array.isArray(currentProfile.semana) || currentProfile.semana.length !== 7) {
+    currentProfile.semana = [[], [], [], [], [], [], []];
+  }
+
   document.getElementById('authScreen').style.display='none';
   document.getElementById('app').classList.add('visible');
-  document.getElementById('userName').textContent=currentProfile.nome;
-  document.getElementById('userAvatar').textContent=currentProfile.nome[0].toUpperCase();
-  document.getElementById('userRoleChip').textContent=currentProfile.role==='admin'?'administrador':'aluno';
+  document.getElementById('userName').textContent    = currentProfile.nome;
+  document.getElementById('userAvatar').textContent  = currentProfile.nome[0].toUpperCase();
+  document.getElementById('userRoleChip').textContent = currentProfile.role==='admin'?'administrador':'aluno';
   if (currentProfile.role==='admin') {
     document.getElementById('navAluno').style.display='none';
     document.getElementById('navAdmin').style.display='block';
@@ -1212,13 +1217,19 @@ function renderSemana() {
 }
 async function toggleBloco(di,bi){currentProfile.semana[di][bi].feito=!currentProfile.semana[di][bi].feito;await FB.updateUserData(currentUser.uid,{semana:currentProfile.semana});renderSemana();}
 async function salvarBloco(){
-  const di=parseInt(document.getElementById('blocoDia').value);
-  const mat=document.getElementById('blocoMateria').value.trim();
-  const hora=document.getElementById('blocoHora').value;
-  const dur=document.getElementById('blocoDur').value;
-  if(!mat)return;
-  currentProfile.semana[di].push({mat,hora,dur,feito:false});
-  await FB.updateUserData(currentUser.uid,{semana:currentProfile.semana});
+  const di  = parseInt(document.getElementById('blocoDia').value);
+  const mat = document.getElementById('blocoMateria').value.trim();
+  const hora = document.getElementById('blocoHora').value;
+  const dur  = document.getElementById('blocoDur').value;
+  if (!mat) return;
+  if (!Array.isArray(currentProfile.semana) || currentProfile.semana.length !== 7) {
+    currentProfile.semana = [[], [], [], [], [], [], []];
+  }
+  currentProfile.semana[di].push({ mat, hora, dur, feito: false });
+  // salva semana como objeto chaveado (Firestore não aceita array de arrays)
+  const semanaObj = {};
+  currentProfile.semana.forEach((blocos, i) => { semanaObj['d'+i] = blocos; });
+  await FB.updateUserData(currentUser.uid, { semanaObj });
   closeModal('modalBloco'); renderSemana();
 }
 
