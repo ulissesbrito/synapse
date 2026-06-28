@@ -523,26 +523,19 @@ textarea.form-input { min-height: 80px; resize: vertical; }
         <!-- ════ ALUNO: DASHBOARD ════ -->
         <div class="view active" id="view-dashboard">
           <div class="stats-grid">
-            <div class="stat-card"><div class="stat-label">Horas esta semana</div><div class="stat-value c-accent">24<span style="font-size:14px">h</span></div><div class="stat-sub">↑ 3h vs semana passada</div></div>
-            <div class="stat-card"><div class="stat-label">Questões respondidas</div><div class="stat-value c-green">847</div><div class="stat-sub">68% de aproveitamento</div></div>
-            <div class="stat-card"><div class="stat-label">Tópicos concluídos</div><div class="stat-value">38<span style="font-size:14px;color:var(--text2)">/92</span></div><div class="stat-sub">41% do edital</div></div>
+            <div class="stat-card"><div class="stat-label">Horas esta semana</div><div class="stat-value c-accent" id="dashHoras">0<span style="font-size:14px">h</span></div><div class="stat-sub" id="dashHorasSub">cadastre seu cronograma</div></div>
+            <div class="stat-card"><div class="stat-label">Questões respondidas</div><div class="stat-value c-green" id="dashQuestoes">0</div><div class="stat-sub" id="dashAprovSub">sem dados ainda</div></div>
+            <div class="stat-card"><div class="stat-label">Tópicos concluídos</div><div class="stat-value" id="dashTopicos">0<span style="font-size:14px;color:var(--text2)" id="dashTopicosTotal">/0</span></div><div class="stat-sub" id="dashEditalSub">0% do edital</div></div>
             <div class="stat-card"><div class="stat-label">Dias p/ prova</div><div class="stat-value c-amber" id="diasProva">--</div><div class="stat-sub" id="diasProvaLabel">Adicione um concurso</div></div>
           </div>
           <div class="grid-2">
             <div class="card">
               <div class="card-title">Progresso por matéria</div>
-              <div id="dashMaterias">
-                <div class="materia-row"><div class="materia-name">Direito Penal</div><div class="progress-track"><div class="progress-fill green" style="width:72%"></div></div><div class="materia-pct">72%</div></div>
-                <div class="materia-row"><div class="materia-name">Processo Penal</div><div class="progress-track"><div class="progress-fill" style="width:55%"></div></div><div class="materia-pct">55%</div></div>
-                <div class="materia-row"><div class="materia-name">Dir. Constitucional</div><div class="progress-track"><div class="progress-fill" style="width:48%"></div></div><div class="materia-pct">48%</div></div>
-                <div class="materia-row"><div class="materia-name">Dir. Administrativo</div><div class="progress-track"><div class="progress-fill amber" style="width:31%"></div></div><div class="materia-pct">31%</div></div>
-              </div>
+              <div id="dashMaterias"></div>
             </div>
             <div class="card">
               <div class="card-title">Agenda de hoje</div>
-              <div class="agenda-item"><div class="agenda-hora">08:00</div><div class="agenda-dot green"></div><div class="agenda-text">Direito Penal — LEP<div style="font-size:10px;color:var(--text2)">Concluído ✓</div></div><div class="agenda-dur">2h</div></div>
-              <div class="agenda-item"><div class="agenda-hora">14:00</div><div class="agenda-dot"></div><div class="agenda-text">Processo Penal — Inquérito</div><div class="agenda-dur">2h</div></div>
-              <div class="agenda-item"><div class="agenda-hora">17:00</div><div class="agenda-dot amber"></div><div class="agenda-text">Questões — Dir. Constitucional</div><div class="agenda-dur">1h</div></div>
+              <div id="dashAgenda"></div>
             </div>
           </div>
           <!-- Aviso do admin no dash -->
@@ -1158,7 +1151,7 @@ async function loginSuccess() {
   } else {
     document.getElementById('navAluno').style.display='block';
     document.getElementById('navAdmin').style.display='none';
-    renderMaterias(); renderSemana(); await loadAvisos();
+    renderDashboard(); renderMaterias(); renderSemana(); await loadAvisos();
     showView('dashboard',document.querySelector('#navAluno .nav-item'));
   }
 }
@@ -1181,6 +1174,7 @@ function showView(id,btn) {
   const el=document.getElementById('view-'+id); if(el)el.classList.add('active');
   if(btn)btn.classList.add('active');
   document.getElementById('pageTitle').textContent=TITLES[id]||id;
+  if(id==='dashboard')renderDashboard();
   if(id==='edital')renderMaterias();
   if(id==='cronograma')renderSemana();
   if(id==='adminDash')loadAdminDash();
@@ -1195,7 +1189,73 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
-// ═══ SEMANA ═══
+// ═══ DASHBOARD ═══
+function renderDashboard() {
+  if (!currentProfile) return;
+
+  // questões e aproveitamento
+  const questoes = currentProfile.questoesTotal || 0;
+  const aprov    = currentProfile.aproveitamento || 0;
+  document.getElementById('dashQuestoes').textContent = questoes;
+  document.getElementById('dashAprovSub').textContent = questoes > 0 ? `${aprov}% de aproveitamento` : 'sem dados ainda';
+
+  // horas
+  const horas = currentProfile.horasSemana || 0;
+  document.getElementById('dashHoras').innerHTML = `${horas}<span style="font-size:14px">h</span>`;
+  document.getElementById('dashHorasSub').textContent = horas > 0 ? 'esta semana' : 'cadastre seu cronograma';
+
+  // tópicos
+  const mats = currentProfile.materias || [];
+  const totalTopicos     = mats.reduce((s, m) => s + (m.topicos?.length || 0), 0);
+  const concluidosTopicos = mats.reduce((s, m) => s + (m.concluidos?.length || 0), 0);
+  const editalPct = totalTopicos > 0 ? Math.round(concluidosTopicos / totalTopicos * 100) : 0;
+  document.getElementById('dashTopicos').innerHTML = `${concluidosTopicos}<span style="font-size:14px;color:var(--text2)" id="dashTopicosTotal">/${totalTopicos}</span>`;
+  document.getElementById('dashEditalSub').textContent = `${editalPct}% do edital`;
+
+  // dias para prova
+  const dataProva = currentProfile.planoAdmin?.dataProva || currentProfile.dataProva;
+  if (dataProva) {
+    const dias = Math.round((new Date(dataProva) - new Date()) / 86400000);
+    document.getElementById('diasProva').textContent = Math.max(0, dias);
+    document.getElementById('diasProvaLabel').textContent = currentProfile.concurso || 'dias restantes';
+  }
+
+  // progresso por matéria
+  const dashMaterias = document.getElementById('dashMaterias');
+  if (!mats.length) {
+    dashMaterias.innerHTML = '<div style="font-size:12px;color:var(--text2);padding:12px 0">Nenhuma matéria cadastrada ainda.<br>Importe seu edital para começar.</div>';
+  } else {
+    dashMaterias.innerHTML = mats.map(m => {
+      const pct   = m.topicos?.length ? Math.round((m.concluidos?.length || 0) / m.topicos.length * 100) : 0;
+      const color = pct >= 70 ? 'green' : pct >= 40 ? '' : 'amber';
+      return `<div class="materia-row">
+        <div class="materia-name">${m.nome}</div>
+        <div class="progress-track"><div class="progress-fill ${color}" style="width:${pct}%"></div></div>
+        <div class="materia-pct">${pct}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  // agenda de hoje
+  const hoje = new Date().getDay();
+  const map  = [6,0,1,2,3,4,5];
+  const diaIdx = map[hoje];
+  const semana = currentProfile.semana || [];
+  const blocosHoje = Array.isArray(semana[diaIdx]) ? semana[diaIdx] : [];
+  const dashAgenda = document.getElementById('dashAgenda');
+  if (!blocosHoje.length) {
+    dashAgenda.innerHTML = '<div style="font-size:12px;color:var(--text2);padding:12px 0">Nenhum bloco para hoje.<br>Adicione blocos no Cronograma.</div>';
+  } else {
+    dashAgenda.innerHTML = blocosHoje.map(b => `
+      <div class="agenda-item">
+        <div class="agenda-hora">${b.hora}</div>
+        <div class="agenda-dot ${b.feito ? 'green' : ''}"></div>
+        <div class="agenda-text">${b.mat}${b.feito ? '<div style="font-size:10px;color:var(--text2)">Concluído ✓</div>' : ''}</div>
+        <div class="agenda-dur">${b.dur}</div>
+      </div>`).join('');
+  }
+}
+
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 function renderSemana() {
   if(!currentProfile)return;
@@ -1551,6 +1611,7 @@ function imprimirRelatorio(){if(relCurrentUid)window.print();}
 
 // ═══ EXPOR FUNÇÕES GLOBALMENTE (necessário com type="module") ═══
 window.switchTab         = switchTab;
+window.renderDashboard   = renderDashboard;
 window.doLogin           = doLogin;
 window.doRegister        = doRegister;
 window.doLogout          = doLogout;
