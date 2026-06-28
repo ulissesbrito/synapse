@@ -1051,26 +1051,14 @@ const FB = {
 function defaultUserData(nome, concurso) {
   return {
     nome, concurso, role: 'aluno',
+    email: '',
     dataProva: '',
-    horasSemana: 20,
+    horasSemana: 0,
     aproveitamento: 65,
     questoesTotal: 0,
     ultimoAcesso: new Date().toISOString(),
-    materias: [
-      { nome:'Direito Penal', topicos:['Teoria do Crime','Tipicidade','Ilicitude','Culpabilidade','Punibilidade','Crimes em espécie','LEP'], concluidos:[0,1,2] },
-      { nome:'Processo Penal', topicos:['Inquérito Policial','Ação Penal','Competência','Provas','Prisões'], concluidos:[0] },
-      { nome:'Dir. Constitucional', topicos:['Princípios Fundamentais','Direitos Fundamentais','Controle de Constitucionalidade'], concluidos:[] },
-      { nome:'Dir. Administrativo', topicos:['Princípios Admin.','Atos Administrativos','Licitação','Improbidade'], concluidos:[] },
-    ],
-    semana: [
-      [{ mat:'Direito Penal', hora:'08:00', dur:'2h', feito:true }],
-      [{ mat:'Processo Penal', hora:'14:00', dur:'2h', feito:false }],
-      [{ mat:'Dir. Constitucional', hora:'08:00', dur:'2h', feito:false }],
-      [{ mat:'Direito Penal', hora:'14:00', dur:'2h', feito:false }],
-      [{ mat:'Questões gerais', hora:'09:00', dur:'3h', feito:false }],
-      [{ mat:'Revisão semanal', hora:'09:00', dur:'2h', feito:false }],
-      [],
-    ],
+    materias: [],
+    semana: [[], [], [], [], [], [], []],
     planoAdmin: null,
     aiHistory: [],
     planoGerado: null,
@@ -1206,9 +1194,14 @@ document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 function renderSemana() {
   if(!currentProfile)return;
-  const grid=document.getElementById('semanaGrid'); grid.innerHTML='';
+  // garante que semana sempre tem 7 posições válidas
+  if (!currentProfile.semana || currentProfile.semana.length !== 7) {
+    currentProfile.semana = [[], [], [], [], [], [], []];
+  }
+  const grid = document.getElementById('semanaGrid'); grid.innerHTML='';
   const map=[6,0,1,2,3,4,5]; const hoje=new Date().getDay();
-  currentProfile.semana.forEach((blocos,di)=>{
+  currentProfile.semana.forEach((blocos, di) => {
+    if (!Array.isArray(blocos)) blocos = [];
     const col=document.createElement('div'); col.className='dia-col';
     const isHoje=map[hoje]===di;
     col.innerHTML=`<div class="dia-header ${isHoje?'hoje':''}">${DIAS[di]}</div>`;
