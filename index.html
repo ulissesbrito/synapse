@@ -448,11 +448,7 @@ textarea.form-input { min-height: 80px; resize: vertical; }
       <button class="btn btn-primary" onclick="doRegister()">Criar conta</button>
     </div>
 
-    <div class="auth-demo">
-      <strong style="color:var(--text3)">Acesso demo</strong><br>
-      Admin: <code style="color:var(--purple)">admin@studyos.com</code> / <code style="color:var(--purple)">admin123</code><br>
-      Aluno: <code style="color:var(--accent)">aluno@studyos.com</code> / <code style="color:var(--accent)">aluno123</code>
-    </div>
+
   </div>
 </div>
 
@@ -1330,21 +1326,39 @@ async function verAlunoDetalhe(uid){
 function voltarListaAlunos(){document.getElementById('adminAlunosList').style.display='block';document.getElementById('adminAlunoDetalhe').style.display='none';}
 
 async function adminCriarAluno(){
-  const nome=document.getElementById('criarNome').value.trim();
-  const email=document.getElementById('criarEmail').value.trim().toLowerCase();
-  const senha=document.getElementById('criarSenha').value;
-  const concurso=document.getElementById('criarConcurso').value.trim();
-  if(!nome||!email||!senha)return alert('Preencha todos os campos obrigatórios.');
-  if(senha.length<6)return alert('Senha deve ter pelo menos 6 caracteres.');
-  try{
-    const res=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_CONFIG.apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:senha,returnSecureToken:true})});
-    const data=await res.json();
-    if(data.error)return alert('Erro: '+data.error.message);
-    await FB.setUser(data.localId,{...defaultUserData(nome,concurso),email,nome,role:'aluno',concurso});
+  const nome     = document.getElementById('criarNome').value.trim();
+  const email    = document.getElementById('criarEmail').value.trim().toLowerCase();
+  const senha    = document.getElementById('criarSenha').value;
+  const concurso = document.getElementById('criarConcurso').value.trim();
+  if (!nome||!email||!senha) return alert('Preencha todos os campos obrigatórios.');
+  if (senha.length < 6) return alert('Senha deve ter pelo menos 6 caracteres.');
+  try {
+    const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_CONFIG.apiKey}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password:senha, returnSecureToken:true })
+    });
+    const data = await res.json();
+    if (data.error) {
+      const erros = {
+        'EMAIL_EXISTS': 'Este e-mail já está cadastrado.',
+        'INVALID_EMAIL': 'E-mail inválido.',
+        'WEAK_PASSWORD : Password should be at least 6 characters': 'Senha deve ter pelo menos 6 caracteres.',
+      };
+      return alert(erros[data.error.message] || 'Erro: ' + data.error.message);
+    }
+    const uid = data.localId;
+    await FB.setUser(uid, { ...defaultUserData(nome, concurso), email, nome, role:'aluno', concurso });
     closeModal('modalCriarAluno');
+    // limpar campos
+    document.getElementById('criarNome').value = '';
+    document.getElementById('criarEmail').value = '';
+    document.getElementById('criarSenha').value = '';
+    document.getElementById('criarConcurso').value = '';
     await loadAdminAlunos(); await loadAdminDash();
-    alert(`Aluno "${nome}" criado!`);
-  }catch(e){alert('Erro: '+e.message);}
+    alert(`✓ Aluno "${nome}" criado com sucesso!\n\nE-mail: ${email}\nSenha: ${senha}\n\nCompartilhe essas credenciais com o aluno.`);
+  } catch(e) {
+    alert('Erro ao criar aluno: ' + e.message);
+  }
 }
 
 // ═══ EDITAR PLANO ═══
